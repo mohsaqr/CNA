@@ -1,0 +1,40 @@
+# Build artifacts
+*.jmo
+*.zip
+*.tar.gz
+build/
+build*/
+
+# R artifacts
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Renviron
+*-Ex.R
+*.Rcheck/
+Rplots*.pdf
+
+# R markdown
+*_cache/
+*.utf8.md
+*.knit.md
+
+# RStudio
+.Rproj.user/
+
+# jamovi
+jamovi/ui/*.options.js
+
+# OS files
+.DS_Store
+
+# Temp
+temp/
+tmp/
+npm-debug.log
+
+# session artifacts (local only)
+LEARNINGS.md
+CHANGES.md
+HANDOFF.md
