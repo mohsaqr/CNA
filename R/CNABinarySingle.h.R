@@ -17,17 +17,14 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             buildModel_show_plot = TRUE,
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
+            buildModel_show_mosaic = FALSE,
+            buildModel_show_distribution = FALSE,
             buildModel_show_mixed = FALSE,
-            buildModel_digits = 1,
-            buildModel_plot_cut = 0.1,
-            buildModel_plot_min_value = 0.05,
-            buildModel_plot_edge_label_size = 1,
-            buildModel_plot_node_size = 1,
-            buildModel_plot_node_label_size = 1,
             centrality_loops = FALSE,
             centrality_normalize = FALSE,
             centrality_show_table = FALSE,
             centrality_show_plot = FALSE,
+            centrality_plot_style = "lollipop",
             centrality_Betweenness = TRUE,
             centrality_Closeness = FALSE,
             centrality_InStrength = TRUE,
@@ -36,6 +33,10 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             community_gamma = 1,
             community_show_table = FALSE,
             community_show_plot = FALSE,
+            stability_show_table = FALSE,
+            stability_show_plot = FALSE,
+            stability_iter = 500,
+            stability_threshold = 0.7,
             bootstrap_iteration = 1000,
             bootstrap_level = 0.05,
             bootstrap_method = "stability",
@@ -47,11 +48,6 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             bootstrap_table_max_rows = 20,
             bootstrap_table_show_all = FALSE,
             bootstrap_table_significant_only = FALSE,
-            bootstrap_plot_cut = 0.1,
-            bootstrap_plot_min_value = 0.05,
-            bootstrap_plot_edge_label_size = 1,
-            bootstrap_plot_node_size = 1,
-            bootstrap_plot_node_label_size = 1,
             permutation_show_table = FALSE,
             permutation_show_plot = FALSE,
             permutation_iter = 1000,
@@ -123,46 +119,18 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "buildModel_show_frequencies",
                 buildModel_show_frequencies,
                 default=FALSE)
+            private$..buildModel_show_mosaic <- jmvcore::OptionBool$new(
+                "buildModel_show_mosaic",
+                buildModel_show_mosaic,
+                default=FALSE)
+            private$..buildModel_show_distribution <- jmvcore::OptionBool$new(
+                "buildModel_show_distribution",
+                buildModel_show_distribution,
+                default=FALSE)
             private$..buildModel_show_mixed <- jmvcore::OptionBool$new(
                 "buildModel_show_mixed",
                 buildModel_show_mixed,
                 default=FALSE)
-            private$..buildModel_digits <- jmvcore::OptionInteger$new(
-                "buildModel_digits",
-                buildModel_digits,
-                default=1,
-                min=0,
-                max=5)
-            private$..buildModel_plot_cut <- jmvcore::OptionNumber$new(
-                "buildModel_plot_cut",
-                buildModel_plot_cut,
-                default=0.1,
-                min=0,
-                max=1)
-            private$..buildModel_plot_min_value <- jmvcore::OptionNumber$new(
-                "buildModel_plot_min_value",
-                buildModel_plot_min_value,
-                default=0.05,
-                min=0,
-                max=1)
-            private$..buildModel_plot_edge_label_size <- jmvcore::OptionNumber$new(
-                "buildModel_plot_edge_label_size",
-                buildModel_plot_edge_label_size,
-                default=1,
-                min=0,
-                max=10)
-            private$..buildModel_plot_node_size <- jmvcore::OptionNumber$new(
-                "buildModel_plot_node_size",
-                buildModel_plot_node_size,
-                default=1,
-                min=0,
-                max=2)
-            private$..buildModel_plot_node_label_size <- jmvcore::OptionNumber$new(
-                "buildModel_plot_node_label_size",
-                buildModel_plot_node_label_size,
-                default=1,
-                min=0,
-                max=10)
             private$..centrality_loops <- jmvcore::OptionBool$new(
                 "centrality_loops",
                 centrality_loops,
@@ -179,6 +147,17 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "centrality_show_plot",
                 centrality_show_plot,
                 default=FALSE)
+            private$..centrality_plot_style <- jmvcore::OptionList$new(
+                "centrality_plot_style",
+                centrality_plot_style,
+                default="lollipop",
+                options=list(
+                    "lollipop",
+                    "bar",
+                    "line",
+                    "dot",
+                    "heatmap",
+                    "distribution"))
             private$..centrality_Betweenness <- jmvcore::OptionBool$new(
                 "centrality_Betweenness",
                 centrality_Betweenness,
@@ -220,6 +199,26 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "community_show_plot",
                 community_show_plot,
                 default=FALSE)
+            private$..stability_show_table <- jmvcore::OptionBool$new(
+                "stability_show_table",
+                stability_show_table,
+                default=FALSE)
+            private$..stability_show_plot <- jmvcore::OptionBool$new(
+                "stability_show_plot",
+                stability_show_plot,
+                default=FALSE)
+            private$..stability_iter <- jmvcore::OptionInteger$new(
+                "stability_iter",
+                stability_iter,
+                default=500,
+                min=50,
+                max=5000)
+            private$..stability_threshold <- jmvcore::OptionNumber$new(
+                "stability_threshold",
+                stability_threshold,
+                default=0.7,
+                min=0,
+                max=1)
             private$..bootstrap_iteration <- jmvcore::OptionInteger$new(
                 "bootstrap_iteration",
                 bootstrap_iteration,
@@ -279,36 +278,6 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "bootstrap_table_significant_only",
                 bootstrap_table_significant_only,
                 default=FALSE)
-            private$..bootstrap_plot_cut <- jmvcore::OptionNumber$new(
-                "bootstrap_plot_cut",
-                bootstrap_plot_cut,
-                default=0.1,
-                min=0,
-                max=1)
-            private$..bootstrap_plot_min_value <- jmvcore::OptionNumber$new(
-                "bootstrap_plot_min_value",
-                bootstrap_plot_min_value,
-                default=0.05,
-                min=0,
-                max=1)
-            private$..bootstrap_plot_edge_label_size <- jmvcore::OptionNumber$new(
-                "bootstrap_plot_edge_label_size",
-                bootstrap_plot_edge_label_size,
-                default=1,
-                min=0,
-                max=10)
-            private$..bootstrap_plot_node_size <- jmvcore::OptionNumber$new(
-                "bootstrap_plot_node_size",
-                bootstrap_plot_node_size,
-                default=1,
-                min=0,
-                max=2)
-            private$..bootstrap_plot_node_label_size <- jmvcore::OptionNumber$new(
-                "bootstrap_plot_node_label_size",
-                bootstrap_plot_node_label_size,
-                default=1,
-                min=0,
-                max=10)
             private$..permutation_show_table <- jmvcore::OptionBool$new(
                 "permutation_show_table",
                 permutation_show_table,
@@ -392,17 +361,14 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..buildModel_show_plot)
             self$.addOption(private$..buildModel_show_histo)
             self$.addOption(private$..buildModel_show_frequencies)
+            self$.addOption(private$..buildModel_show_mosaic)
+            self$.addOption(private$..buildModel_show_distribution)
             self$.addOption(private$..buildModel_show_mixed)
-            self$.addOption(private$..buildModel_digits)
-            self$.addOption(private$..buildModel_plot_cut)
-            self$.addOption(private$..buildModel_plot_min_value)
-            self$.addOption(private$..buildModel_plot_edge_label_size)
-            self$.addOption(private$..buildModel_plot_node_size)
-            self$.addOption(private$..buildModel_plot_node_label_size)
             self$.addOption(private$..centrality_loops)
             self$.addOption(private$..centrality_normalize)
             self$.addOption(private$..centrality_show_table)
             self$.addOption(private$..centrality_show_plot)
+            self$.addOption(private$..centrality_plot_style)
             self$.addOption(private$..centrality_Betweenness)
             self$.addOption(private$..centrality_Closeness)
             self$.addOption(private$..centrality_InStrength)
@@ -411,6 +377,10 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..community_gamma)
             self$.addOption(private$..community_show_table)
             self$.addOption(private$..community_show_plot)
+            self$.addOption(private$..stability_show_table)
+            self$.addOption(private$..stability_show_plot)
+            self$.addOption(private$..stability_iter)
+            self$.addOption(private$..stability_threshold)
             self$.addOption(private$..bootstrap_iteration)
             self$.addOption(private$..bootstrap_level)
             self$.addOption(private$..bootstrap_method)
@@ -422,11 +392,6 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..bootstrap_table_max_rows)
             self$.addOption(private$..bootstrap_table_show_all)
             self$.addOption(private$..bootstrap_table_significant_only)
-            self$.addOption(private$..bootstrap_plot_cut)
-            self$.addOption(private$..bootstrap_plot_min_value)
-            self$.addOption(private$..bootstrap_plot_edge_label_size)
-            self$.addOption(private$..bootstrap_plot_node_size)
-            self$.addOption(private$..bootstrap_plot_node_label_size)
             self$.addOption(private$..permutation_show_table)
             self$.addOption(private$..permutation_show_plot)
             self$.addOption(private$..permutation_iter)
@@ -454,17 +419,14 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         buildModel_show_plot = function() private$..buildModel_show_plot$value,
         buildModel_show_histo = function() private$..buildModel_show_histo$value,
         buildModel_show_frequencies = function() private$..buildModel_show_frequencies$value,
+        buildModel_show_mosaic = function() private$..buildModel_show_mosaic$value,
+        buildModel_show_distribution = function() private$..buildModel_show_distribution$value,
         buildModel_show_mixed = function() private$..buildModel_show_mixed$value,
-        buildModel_digits = function() private$..buildModel_digits$value,
-        buildModel_plot_cut = function() private$..buildModel_plot_cut$value,
-        buildModel_plot_min_value = function() private$..buildModel_plot_min_value$value,
-        buildModel_plot_edge_label_size = function() private$..buildModel_plot_edge_label_size$value,
-        buildModel_plot_node_size = function() private$..buildModel_plot_node_size$value,
-        buildModel_plot_node_label_size = function() private$..buildModel_plot_node_label_size$value,
         centrality_loops = function() private$..centrality_loops$value,
         centrality_normalize = function() private$..centrality_normalize$value,
         centrality_show_table = function() private$..centrality_show_table$value,
         centrality_show_plot = function() private$..centrality_show_plot$value,
+        centrality_plot_style = function() private$..centrality_plot_style$value,
         centrality_Betweenness = function() private$..centrality_Betweenness$value,
         centrality_Closeness = function() private$..centrality_Closeness$value,
         centrality_InStrength = function() private$..centrality_InStrength$value,
@@ -473,6 +435,10 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         community_gamma = function() private$..community_gamma$value,
         community_show_table = function() private$..community_show_table$value,
         community_show_plot = function() private$..community_show_plot$value,
+        stability_show_table = function() private$..stability_show_table$value,
+        stability_show_plot = function() private$..stability_show_plot$value,
+        stability_iter = function() private$..stability_iter$value,
+        stability_threshold = function() private$..stability_threshold$value,
         bootstrap_iteration = function() private$..bootstrap_iteration$value,
         bootstrap_level = function() private$..bootstrap_level$value,
         bootstrap_method = function() private$..bootstrap_method$value,
@@ -484,11 +450,6 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
         bootstrap_table_show_all = function() private$..bootstrap_table_show_all$value,
         bootstrap_table_significant_only = function() private$..bootstrap_table_significant_only$value,
-        bootstrap_plot_cut = function() private$..bootstrap_plot_cut$value,
-        bootstrap_plot_min_value = function() private$..bootstrap_plot_min_value$value,
-        bootstrap_plot_edge_label_size = function() private$..bootstrap_plot_edge_label_size$value,
-        bootstrap_plot_node_size = function() private$..bootstrap_plot_node_size$value,
-        bootstrap_plot_node_label_size = function() private$..bootstrap_plot_node_label_size$value,
         permutation_show_table = function() private$..permutation_show_table$value,
         permutation_show_plot = function() private$..permutation_show_plot$value,
         permutation_iter = function() private$..permutation_iter$value,
@@ -515,17 +476,14 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..buildModel_show_plot = NA,
         ..buildModel_show_histo = NA,
         ..buildModel_show_frequencies = NA,
+        ..buildModel_show_mosaic = NA,
+        ..buildModel_show_distribution = NA,
         ..buildModel_show_mixed = NA,
-        ..buildModel_digits = NA,
-        ..buildModel_plot_cut = NA,
-        ..buildModel_plot_min_value = NA,
-        ..buildModel_plot_edge_label_size = NA,
-        ..buildModel_plot_node_size = NA,
-        ..buildModel_plot_node_label_size = NA,
         ..centrality_loops = NA,
         ..centrality_normalize = NA,
         ..centrality_show_table = NA,
         ..centrality_show_plot = NA,
+        ..centrality_plot_style = NA,
         ..centrality_Betweenness = NA,
         ..centrality_Closeness = NA,
         ..centrality_InStrength = NA,
@@ -534,6 +492,10 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..community_gamma = NA,
         ..community_show_table = NA,
         ..community_show_plot = NA,
+        ..stability_show_table = NA,
+        ..stability_show_plot = NA,
+        ..stability_iter = NA,
+        ..stability_threshold = NA,
         ..bootstrap_iteration = NA,
         ..bootstrap_level = NA,
         ..bootstrap_method = NA,
@@ -545,11 +507,6 @@ CNABinarySingleOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..bootstrap_table_max_rows = NA,
         ..bootstrap_table_show_all = NA,
         ..bootstrap_table_significant_only = NA,
-        ..bootstrap_plot_cut = NA,
-        ..bootstrap_plot_min_value = NA,
-        ..bootstrap_plot_edge_label_size = NA,
-        ..bootstrap_plot_node_size = NA,
-        ..bootstrap_plot_node_label_size = NA,
         ..permutation_show_table = NA,
         ..permutation_show_plot = NA,
         ..permutation_iter = NA,
@@ -578,6 +535,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         buildModel_plot = function() private$.items[["buildModel_plot"]],
         buildModel_histo = function() private$.items[["buildModel_histo"]],
         buildModel_frequencies = function() private$.items[["buildModel_frequencies"]],
+        buildModel_mosaic = function() private$.items[["buildModel_mosaic"]],
+        buildModel_distribution = function() private$.items[["buildModel_distribution"]],
         buildModel_mixed = function() private$.items[["buildModel_mixed"]],
         centralityTitle = function() private$.items[["centralityTitle"]],
         centralityTable = function() private$.items[["centralityTable"]],
@@ -597,7 +556,11 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         compareTitle = function() private$.items[["compareTitle"]],
         compareSummaryTable = function() private$.items[["compareSummaryTable"]],
         compareNetworkTable = function() private$.items[["compareNetworkTable"]],
-        compare_plot = function() private$.items[["compare_plot"]]),
+        compare_plot = function() private$.items[["compare_plot"]],
+        stabilityTitle = function() private$.items[["stabilityTitle"]],
+        stabilityTable = function() private$.items[["stabilityTable"]],
+        reliabilityTable = function() private$.items[["reliabilityTable"]],
+        stability_plot = function() private$.items[["stability_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -654,8 +617,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_plot",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showBuildModelPlot",
                 clearWith=list(
@@ -665,17 +628,12 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_group",
                     "buildModel_window",
                     "buildModel_window_type",
-                    "buildModel_scaling",
-                    "buildModel_plot_cut",
-                    "buildModel_plot_min_value",
-                    "buildModel_plot_edge_label_size",
-                    "buildModel_plot_node_size",
-                    "buildModel_plot_node_label_size")))
+                    "buildModel_scaling")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_histo",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showBuildModelHisto",
                 clearWith=list(
@@ -689,8 +647,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_frequencies",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showBuildModelFrequencies",
                 clearWith=list(
@@ -703,10 +661,40 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_scaling")))
             self$add(jmvcore::Image$new(
                 options=options,
+                name="buildModel_mosaic",
+                width=600,
+                height=450,
+                visible=FALSE,
+                renderFun=".showBuildModelMosaic",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_window_type",
+                    "buildModel_scaling")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="buildModel_distribution",
+                width=600,
+                height=450,
+                visible=FALSE,
+                renderFun=".showBuildModelDistribution",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_window_type",
+                    "buildModel_scaling")))
+            self$add(jmvcore::Image$new(
+                options=options,
                 name="buildModel_mixed",
                 title="Mixed Network",
-                width=1000,
-                height=500,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showBuildModelMixed",
                 clearWith=list(
@@ -753,8 +741,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="centrality_plot",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showCentralityPlot",
                 clearWith=list(
@@ -812,8 +800,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="community_plot",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showCommunityPlot",
                 clearWith=list(
@@ -895,8 +883,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="bootstrap_plot",
-                width=1000,
-                height=800,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showBootstrapPlot",
                 clearWith=list(
@@ -959,8 +947,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="permutation_plot",
-                width=1000,
-                height=1000,
+                width=600,
+                height=600,
                 visible=FALSE,
                 renderFun=".showPermutationPlot",
                 clearWith=list(
@@ -1041,8 +1029,8 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Image$new(
                 options=options,
                 name="compare_plot",
-                width=700,
-                height=500,
+                width=600,
+                height=450,
                 visible=FALSE,
                 renderFun=".showComparePlot",
                 clearWith=list(
@@ -1056,7 +1044,107 @@ CNABinarySingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "compare_group_i",
                     "compare_group_j",
                     "compare_scaling",
-                    "compare_plot_type")))}))
+                    "compare_plot_type")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="stabilityTitle",
+                title="Reliability & Stability",
+                visible=FALSE))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stabilityTable",
+                title="Centrality Stability",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="cs", 
+                        `title`="CS-coefficient", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_window_type",
+                    "buildModel_scaling",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_OutStrength",
+                    "centrality_InStrength",
+                    "centrality_Closeness",
+                    "centrality_Betweenness",
+                    "stability_iter",
+                    "stability_threshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="reliabilityTable",
+                title="Split-half Reliability",
+                visible=FALSE,
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Group", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_window_type",
+                    "buildModel_scaling",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_OutStrength",
+                    "centrality_InStrength",
+                    "centrality_Closeness",
+                    "centrality_Betweenness",
+                    "stability_iter")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="stability_plot",
+                title="Centrality Stability",
+                width=600,
+                height=450,
+                visible=FALSE,
+                renderFun=".showStabilityPlot",
+                clearWith=list(
+                    "buildModel_variables_onehot",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_session",
+                    "buildModel_variables_group",
+                    "buildModel_window",
+                    "buildModel_window_type",
+                    "buildModel_scaling",
+                    "centrality_loops",
+                    "centrality_normalize",
+                    "centrality_OutStrength",
+                    "centrality_InStrength",
+                    "centrality_Closeness",
+                    "centrality_Betweenness",
+                    "stability_iter",
+                    "stability_threshold")))}))
 
 CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "CNABinarySingleBase",
@@ -1094,17 +1182,14 @@ CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param buildModel_show_plot .
 #' @param buildModel_show_histo .
 #' @param buildModel_show_frequencies .
+#' @param buildModel_show_mosaic .
+#' @param buildModel_show_distribution .
 #' @param buildModel_show_mixed .
-#' @param buildModel_digits .
-#' @param buildModel_plot_cut .
-#' @param buildModel_plot_min_value .
-#' @param buildModel_plot_edge_label_size .
-#' @param buildModel_plot_node_size .
-#' @param buildModel_plot_node_label_size .
 #' @param centrality_loops .
 #' @param centrality_normalize .
 #' @param centrality_show_table .
 #' @param centrality_show_plot .
+#' @param centrality_plot_style .
 #' @param centrality_Betweenness .
 #' @param centrality_Closeness .
 #' @param centrality_InStrength .
@@ -1113,6 +1198,10 @@ CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param community_gamma .
 #' @param community_show_table .
 #' @param community_show_plot .
+#' @param stability_show_table .
+#' @param stability_show_plot .
+#' @param stability_iter .
+#' @param stability_threshold .
 #' @param bootstrap_iteration .
 #' @param bootstrap_level .
 #' @param bootstrap_method .
@@ -1124,11 +1213,6 @@ CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param bootstrap_table_max_rows .
 #' @param bootstrap_table_show_all .
 #' @param bootstrap_table_significant_only .
-#' @param bootstrap_plot_cut .
-#' @param bootstrap_plot_min_value .
-#' @param bootstrap_plot_edge_label_size .
-#' @param bootstrap_plot_node_size .
-#' @param bootstrap_plot_node_label_size .
 #' @param permutation_show_table .
 #' @param permutation_show_plot .
 #' @param permutation_iter .
@@ -1153,6 +1237,8 @@ CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$buildModel_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_histo} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_frequencies} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$buildModel_mosaic} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$buildModel_distribution} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_mixed} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$centralityTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
@@ -1173,6 +1259,10 @@ CNABinarySingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$compareSummaryTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$compareNetworkTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$compare_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$stabilityTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$stabilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$reliabilityTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$stability_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -1195,17 +1285,14 @@ CNABinarySingle <- function(
     buildModel_show_plot = TRUE,
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
+    buildModel_show_mosaic = FALSE,
+    buildModel_show_distribution = FALSE,
     buildModel_show_mixed = FALSE,
-    buildModel_digits = 1,
-    buildModel_plot_cut = 0.1,
-    buildModel_plot_min_value = 0.05,
-    buildModel_plot_edge_label_size = 1,
-    buildModel_plot_node_size = 1,
-    buildModel_plot_node_label_size = 1,
     centrality_loops = FALSE,
     centrality_normalize = FALSE,
     centrality_show_table = FALSE,
     centrality_show_plot = FALSE,
+    centrality_plot_style = "lollipop",
     centrality_Betweenness = TRUE,
     centrality_Closeness = FALSE,
     centrality_InStrength = TRUE,
@@ -1214,6 +1301,10 @@ CNABinarySingle <- function(
     community_gamma = 1,
     community_show_table = FALSE,
     community_show_plot = FALSE,
+    stability_show_table = FALSE,
+    stability_show_plot = FALSE,
+    stability_iter = 500,
+    stability_threshold = 0.7,
     bootstrap_iteration = 1000,
     bootstrap_level = 0.05,
     bootstrap_method = "stability",
@@ -1225,11 +1316,6 @@ CNABinarySingle <- function(
     bootstrap_table_max_rows = 20,
     bootstrap_table_show_all = FALSE,
     bootstrap_table_significant_only = FALSE,
-    bootstrap_plot_cut = 0.1,
-    bootstrap_plot_min_value = 0.05,
-    bootstrap_plot_edge_label_size = 1,
-    bootstrap_plot_node_size = 1,
-    bootstrap_plot_node_label_size = 1,
     permutation_show_table = FALSE,
     permutation_show_plot = FALSE,
     permutation_iter = 1000,
@@ -1273,17 +1359,14 @@ CNABinarySingle <- function(
         buildModel_show_plot = buildModel_show_plot,
         buildModel_show_histo = buildModel_show_histo,
         buildModel_show_frequencies = buildModel_show_frequencies,
+        buildModel_show_mosaic = buildModel_show_mosaic,
+        buildModel_show_distribution = buildModel_show_distribution,
         buildModel_show_mixed = buildModel_show_mixed,
-        buildModel_digits = buildModel_digits,
-        buildModel_plot_cut = buildModel_plot_cut,
-        buildModel_plot_min_value = buildModel_plot_min_value,
-        buildModel_plot_edge_label_size = buildModel_plot_edge_label_size,
-        buildModel_plot_node_size = buildModel_plot_node_size,
-        buildModel_plot_node_label_size = buildModel_plot_node_label_size,
         centrality_loops = centrality_loops,
         centrality_normalize = centrality_normalize,
         centrality_show_table = centrality_show_table,
         centrality_show_plot = centrality_show_plot,
+        centrality_plot_style = centrality_plot_style,
         centrality_Betweenness = centrality_Betweenness,
         centrality_Closeness = centrality_Closeness,
         centrality_InStrength = centrality_InStrength,
@@ -1292,6 +1375,10 @@ CNABinarySingle <- function(
         community_gamma = community_gamma,
         community_show_table = community_show_table,
         community_show_plot = community_show_plot,
+        stability_show_table = stability_show_table,
+        stability_show_plot = stability_show_plot,
+        stability_iter = stability_iter,
+        stability_threshold = stability_threshold,
         bootstrap_iteration = bootstrap_iteration,
         bootstrap_level = bootstrap_level,
         bootstrap_method = bootstrap_method,
@@ -1303,11 +1390,6 @@ CNABinarySingle <- function(
         bootstrap_table_max_rows = bootstrap_table_max_rows,
         bootstrap_table_show_all = bootstrap_table_show_all,
         bootstrap_table_significant_only = bootstrap_table_significant_only,
-        bootstrap_plot_cut = bootstrap_plot_cut,
-        bootstrap_plot_min_value = bootstrap_plot_min_value,
-        bootstrap_plot_edge_label_size = bootstrap_plot_edge_label_size,
-        bootstrap_plot_node_size = bootstrap_plot_node_size,
-        bootstrap_plot_node_label_size = bootstrap_plot_node_label_size,
         permutation_show_table = permutation_show_table,
         permutation_show_plot = permutation_show_plot,
         permutation_iter = permutation_iter,

@@ -55,8 +55,8 @@ items:
 
     - name: buildModel_plot
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showBuildModelPlot
       clearWith:
@@ -67,16 +67,11 @@ items:
         - buildModel_variables_group
         - buildModel_scaling
         - buildModel_threshold
-        - buildModel_plot_cut
-        - buildModel_plot_min_value
-        - buildModel_plot_edge_label_size
-        - buildModel_plot_node_size
-        - buildModel_plot_node_label_size
 
     - name: buildModel_histo
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showBuildModelHisto
       clearWith:
@@ -90,10 +85,40 @@ items:
 
     - name: buildModel_frequencies
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showBuildModelFrequencies
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: buildModel_mosaic
+      type: Image
+      width: 600
+      height: 450
+      visible: False
+      renderFun: .showBuildModelMosaic
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+
+    - name: buildModel_distribution
+      type: Image
+      width: 600
+      height: 450
+      visible: False
+      renderFun: .showBuildModelDistribution
       clearWith:
         - buildModel_variables_long_action
         - buildModel_variables_actor
@@ -138,8 +163,8 @@ items:
 
     - name: centrality_plot
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showCentralityPlot
       clearWith:
@@ -197,8 +222,8 @@ items:
 
     - name: community_plot
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showCommunityPlot
       clearWith:
@@ -272,8 +297,8 @@ items:
 
     - name: bootstrap_plot
       type: Image
-      width: 1000
-      height: 800
+      width: 600
+      height: 450
       visible: False
       renderFun: .showBootstrapPlot
       clearWith:
@@ -333,8 +358,8 @@ items:
 
     - name: permutation_plot
       type: Image
-      width: 1000
-      height: 1000
+      width: 600
+      height: 600
       visible: False
       renderFun: .showPermutationPlot
       clearWith:
@@ -412,8 +437,8 @@ items:
 
     - name: compare_plot
       type: Image
-      width: 700
-      height: 500
+      width: 600
+      height: 450
       visible: False
       renderFun: .showComparePlot
       clearWith:
@@ -431,4 +456,96 @@ items:
 
     ### NETWORK DIFFERENCE PLOT
 
+    - name: stabilityTitle
+      title: Reliability & Stability
+      type: Preformatted
+      visible: false
+
+    - name: stabilityTable
+      title: Centrality Stability
+      type: Table
+      visible: false
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: measure
+          title: Measure
+          type: text
+        - name: cs
+          title: CS-coefficient
+          type: number
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_Closeness
+        - centrality_Betweenness
+        - stability_iter
+        - stability_threshold
+
+    - name: reliabilityTable
+      title: Split-half Reliability
+      type: Table
+      visible: false
+      columns:
+        - name: group
+          title: Group
+          type: text
+        - name: metric
+          title: Metric
+          type: text
+        - name: mean
+          title: Mean
+          type: number
+        - name: sd
+          title: SD
+          type: number
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_Closeness
+        - centrality_Betweenness
+        - stability_iter
+
+    - name: stability_plot
+      title: Centrality Stability
+      type: Image
+      width: 600
+      height: 450
+      visible: false
+      renderFun: .showStabilityPlot
+      clearWith:
+        - buildModel_variables_long_action
+        - buildModel_variables_actor
+        - buildModel_variables_long_time
+        - buildModel_variables_long_order
+        - buildModel_variables_group
+        - buildModel_scaling
+        - buildModel_threshold
+        - centrality_loops
+        - centrality_normalize
+        - centrality_OutStrength
+        - centrality_InStrength
+        - centrality_Closeness
+        - centrality_Betweenness
+        - stability_iter
+        - stability_threshold
 ...

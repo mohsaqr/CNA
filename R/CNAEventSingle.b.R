@@ -66,12 +66,15 @@ CNAEventSingleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
         self$results$buildModel_plot$setVisible(self$options$buildModel_show_plot)
         self$results$buildModel_histo$setVisible(self$options$buildModel_show_histo)
         self$results$buildModel_frequencies$setVisible(self$options$buildModel_show_frequencies)
+        self$results$buildModel_mosaic$setVisible(self$options$buildModel_show_mosaic)
+        self$results$buildModel_distribution$setVisible(self$options$buildModel_show_distribution)
       }
 
       # ── Analyses (all Nestimate / cograph) ──
       cna_run_centrality_nest(model, self$options, self$results, is_multi)
       cna_run_community_nest(model, self$options, self$results, is_multi)
       cna_run_bootstrap_nest(model, self$options, self$results, is_multi)
+      cna_run_stability_nest(model, self$options, self$results, is_multi)
       if (is_multi) {
         cna_run_permutation_nest(model, self$options, self$results)
         cna_run_compare_nest(model, self$options, self$results, mode = "group")
@@ -96,6 +99,16 @@ CNAEventSingleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
       cna_splot_freq_nest(self$results$buildModelContent$state, is_multi)
     },
 
+    .showBuildModelMosaic = function(image, ...) {
+      if (!self$options$buildModel_show_mosaic) return(FALSE)
+      cna_splot_mosaic_nest(self$results$buildModelContent$state)
+    },
+
+    .showBuildModelDistribution = function(image, ...) {
+      if (!self$options$buildModel_show_distribution) return(FALSE)
+      cna_splot_distribution_nest(self$results$buildModelContent$state)
+    },
+
     .showCentralityPlot = function(image, ...) {
       if (!self$options$centrality_show_plot) return(FALSE)
       is_multi <- !is.null(self$options$buildModel_variables_group)
@@ -112,6 +125,11 @@ CNAEventSingleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
     .showBootstrapPlot = function(image, ...) {
       if (!self$options$bootstrap_show_plot) return(FALSE)
       cna_splot_bootstrap_nest(self$results$bootstrap_plot$state)
+    },
+
+    .showStabilityPlot = function(image, ...) {
+      if (!self$options$stability_show_plot) return(FALSE)
+      cna_splot_stability_nest(self$results$stability_plot$state)
     },
 
     .showPermutationPlot = function(image, ...) {

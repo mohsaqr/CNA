@@ -1328,25 +1328,33 @@ cna_splot_histo_nest <- function(model, is_multi) {
   TRUE
 }
 
-#' State-frequency barplot from Nestimate::state_frequencies.
-cna_splot_freq_nest <- function(model, is_multi) {
+#' State-frequency plot via Nestimate::plot_state_frequencies (handles single
+#' and group/cluster objects on its own).
+cna_splot_freq_nest <- function(model, is_multi = FALSE) {
   if (is.null(model)) return(FALSE)
-  draw <- function(net, ttl) {
-    sf <- tryCatch(Nestimate::state_frequencies(net), error = function(e) NULL)
-    if (is.null(sf)) {
-      d <- diag(net$weights); sf <- data.frame(state = names(d), count = as.numeric(d))
-    }
-    o <- order(sf$count, decreasing = TRUE)
-    barplot(stats::setNames(sf$count[o], sf$state[o]), las = 2,
-            main = ttl, ylab = "Count", col = "steelblue", border = NA)
-  }
+  tryCatch(
+    invisible(utils::capture.output(print(Nestimate::plot_state_frequencies(model)))),
+    error = function(e) plot(1, type = "n", main = "Frequencies error",
+                             sub = e$message))
+  TRUE
+}
+
+#' Mosaic plot via Nestimate::mosaic_plot (ggplot; single or group).
+cna_splot_mosaic_nest <- function(model) {
+  if (is.null(model)) return(FALSE)
+  tryCatch(print(Nestimate::mosaic_plot(model)),
+           error = function(e) plot(1, type = "n", main = "Mosaic error",
+                                    sub = e$message))
+  TRUE
+}
+
+#' Edge-weight distribution plot via Nestimate::distribution_plot.
+cna_splot_distribution_nest <- function(model) {
+  if (is.null(model)) return(FALSE)
   tryCatch({
-    if (is_multi) {
-      cna_set_panel_layout(length(model))
-      invisible(Map(function(net, g) draw(net, paste("Frequencies -", g)),
-                    model, names(model)))
-    } else draw(model, "State Frequencies")
-  }, error = function(e) plot(1, type = "n", main = "Frequencies error",
+    p <- Nestimate::distribution_plot(model)
+    if (inherits(p, c("ggplot", "gg"))) print(p)
+  }, error = function(e) plot(1, type = "n", main = "Distribution error",
                               sub = e$message))
   TRUE
 }
@@ -1355,13 +1363,34 @@ cna_splot_freq_nest <- function(model, is_multi) {
 #' stacks one plot per group with patchwork.
 cna_splot_centrality_nest <- function(model, options, is_multi) {
   if (is.null(model)) return(FALSE)
+  measures <- cna_cograph_measures(options)
+  if (!length(measures)) measures <- "betweenness"
+  style <- options$centrality_plot_style
+  if (is.null(style) || !nzchar(style)) style <- "lollipop"
+  nets <- if (is_multi) model else stats::setNames(list(model), "")
   tryCatch({
-    if (is_multi) {
-      print(patchwork::wrap_plots(lapply(model, cograph::plot_centrality)))
+    if (style == "distribution") {
+      # base-graphics distribution of centrality values (one panel per group)
+      if (is_multi) cna_set_panel_layout(length(nets))
+      invisible(Map(function(net, g) cograph::plot_centrality_distribution(
+        net, main = if (nzchar(g)) g else "Centrality distribution"),
+        nets, names(nets)))
     } else {
-      print(cograph::plot_centrality(model))
+      # ggplot styles: lollipop / bar / line / dot (plot_centrality) or
+      # heatmap (plot_centrality_heatmap); groups stacked with patchwork
+      one <- function(net, g) {
+        p <- if (style == "heatmap")
+          cograph::plot_centrality_heatmap(net, measures = measures)
+        else
+          cograph::plot_centrality(net, measures = measures, style = style)
+        if (nzchar(g)) p <- p + ggplot2::ggtitle(g)
+        p
+      }
+      if (is_multi)
+        print(patchwork::wrap_plots(Map(one, nets, names(nets)), ncol = 1))
+      else print(one(nets[[1]], ""))
     }
-  }, error = function(e) plot(1, type = "n", main = "Centrality error",
+  }, error = function(e) plot(1, type = "n", main = "Centrality plot error",
                               sub = e$message))
   TRUE
 }
@@ -1532,3 +1561,97 @@ cna_splot_mixed_nest <- function(mixed) {
   TRUE
 }
 
+
+# ----------------------------------------------------------------------------
+#  Reliability & Stability (Nestimate): centrality_stability (CS per measure,
+#  plotted), casedrop_reliability (edge-weight CS), network_reliability
+#  (split-half). centrality_stability uses Nestimate net_centrality measure
+#  names (InStrength/OutStrength/Betweenness/Closeness), not cograph's.
+# ----------------------------------------------------------------------------
+
+#' Map the centrality checkboxes onto Nestimate net_centrality measure names.
+cna_nestimate_measures <- function(options) {
+  unique(c(
+    if (isTRUE(options$centrality_InStrength))  "InStrength",
+    if (isTRUE(options$centrality_OutStrength)) "OutStrength",
+    if (isTRUE(options$centrality_Betweenness)) "Betweenness",
+    if (isTRUE(options$centrality_Closeness))   "Closeness"
+  ))
+}
+
+#' Tidy CS-coefficients: one row per measure (+ an "Edge weights" row from the
+#' case-drop reliability), with a group column. Handles single + group objects.
+cna_stability_rows <- function(cs, cd, is_multi) {
+  one_stab <- function(st, g) data.frame(
+    group = g, measure = names(st$cs), cs = as.numeric(st$cs),
+    row.names = NULL, stringsAsFactors = FALSE)
+  one_edge <- function(c0, g) data.frame(
+    group = g, measure = "Edge weights", cs = as.numeric(c0$cs),
+    row.names = NULL, stringsAsFactors = FALSE)
+  if (is_multi) {
+    stab <- do.call(rbind, Map(one_stab, cs, names(cs)))
+    edge <- if (!is.null(cd)) do.call(rbind, Map(one_edge, cd, names(cd))) else NULL
+  } else {
+    stab <- one_stab(cs, "")
+    edge <- if (!is.null(cd)) one_edge(cd, "") else NULL
+  }
+  rbind(stab, edge)
+}
+
+#' Reliability & Stability tables + plot (single, group, or cluster).
+cna_run_stability_nest <- function(model, options, results, is_multi) {
+  if (is.null(model)) return()
+  if (!isTRUE(options$stability_show_table) &&
+      !isTRUE(options$stability_show_plot)) return()
+
+  measures <- cna_nestimate_measures(options)
+  if (!length(measures)) measures <- c("Betweenness", "Closeness")
+  iter <- options$stability_iter
+  thr  <- options$stability_threshold
+
+  cs <- results$stability_plot$state
+  if (is.null(cs)) {
+    cs <- tryCatch(Nestimate::centrality_stability(
+      model, measures = measures, iter = iter, threshold = thr),
+      error = function(e) {
+        results$stabilityTable$setNote("error", paste("Error:", e$message)); NULL
+      })
+    if (!is.null(cs)) results$stability_plot$setState(cs)
+  }
+
+  if (isTRUE(options$stability_show_table) && !is.null(cs)) {
+    cd <- tryCatch(Nestimate::casedrop_reliability(model, iter = iter,
+                   threshold = thr), error = function(e) NULL)
+    rows <- cna_stability_rows(cs, cd, is_multi)
+    invisible(lapply(seq_len(nrow(rows)), function(i)
+      results$stabilityTable$addRow(rowKey = i, values = list(
+        group = rows$group[i], measure = rows$measure[i],
+        cs = as.numeric(rows$cs[i])))))
+
+    nr <- tryCatch(Nestimate::network_reliability(model, iter = iter),
+                   error = function(e) NULL)
+    if (!is.null(nr) && !is.null(nr$summary) && nrow(nr$summary) > 0) {
+      s <- nr$summary
+      gcol <- if ("model" %in% names(s)) as.character(s$model) else rep("", nrow(s))
+      invisible(lapply(seq_len(nrow(s)), function(i)
+        results$reliabilityTable$addRow(rowKey = i, values = list(
+          group = gcol[i], metric = as.character(s$metric[i]),
+          mean = as.numeric(s$mean[i]), sd = as.numeric(s$sd[i])))))
+    }
+  }
+
+  show <- isTRUE(options$stability_show_table) || isTRUE(options$stability_show_plot)
+  results$stabilityTitle$setVisible(show)
+  results$stabilityTable$setVisible(isTRUE(options$stability_show_table))
+  results$reliabilityTable$setVisible(isTRUE(options$stability_show_table))
+  results$stability_plot$setVisible(isTRUE(options$stability_show_plot))
+}
+
+#' Centrality-stability plot (splot renders net_stability / _group).
+cna_splot_stability_nest <- function(cs) {
+  if (is.null(cs)) return(FALSE)
+  tryCatch(cograph::splot(cs),
+           error = function(e) plot(1, type = "n", main = "Stability error",
+                                    sub = e$message))
+  TRUE
+}

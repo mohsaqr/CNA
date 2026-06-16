@@ -80,49 +80,17 @@ options:
       type: Bool
       default: False
 
-    - name: buildModel_digits
-      title: Digits
-      type: Integer
-      default: 1
-      min: 0
-      max: 5
+    - name: buildModel_show_mosaic
+      title: Mosaic plot
+      type: Bool
+      default: False
+
+    - name: buildModel_show_distribution
+      title: Distribution plot
+      type: Bool
+      default: False
 
     ##### PLOT PARAMS
-
-    - name: buildModel_plot_cut
-      title: Cut value
-      type: Number
-      default: 0.1
-      min: 0
-      max: 1
-
-    - name: buildModel_plot_min_value
-      title: Minimum value
-      type: Number
-      default: 0.05
-      min: 0
-      max: 1
-
-    - name: buildModel_plot_edge_label_size
-      title: Edge label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
-
-    - name: buildModel_plot_node_size
-      title: Node size
-      type: Number
-      default: 1
-      min: 0
-      max: 2
-
-    - name: buildModel_plot_node_label_size
-      title: Node label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
 
     ### CENTRALITY DATA
 
@@ -145,6 +113,24 @@ options:
       title: Plot
       type: Bool
       default: False
+
+    - name: centrality_plot_style
+      title: Plot style
+      type: List
+      default: lollipop
+      options:
+        - name: lollipop
+          title: Lollipop
+        - name: bar
+          title: Bar
+        - name: line
+          title: Line
+        - name: dot
+          title: Dot
+        - name: heatmap
+          title: Heatmap
+        - name: distribution
+          title: Distribution
 
     - name: centrality_Betweenness
       title: Betweenness
@@ -202,6 +188,32 @@ options:
       title: Plot
       type: Bool
       default: False
+
+    ### RELIABILITY & STABILITY
+
+    - name: stability_show_table
+      title: Table
+      type: Bool
+      default: false
+
+    - name: stability_show_plot
+      title: Plot
+      type: Bool
+      default: false
+
+    - name: stability_iter
+      title: Iterations
+      type: Integer
+      default: 500
+      min: 50
+      max: 5000
+
+    - name: stability_threshold
+      title: Stability threshold
+      type: Number
+      default: 0.7
+      min: 0
+      max: 1
 
     ### BOOTSTRAP
 
@@ -276,41 +288,6 @@ options:
       title: Significant only
       type: Bool
       default: False
-
-    - name: bootstrap_plot_cut
-      title: Cut value
-      type: Number
-      default: 0.1
-      min: 0
-      max: 1
-
-    - name: bootstrap_plot_min_value
-      title: Minimum value
-      type: Number
-      default: 0.05
-      min: 0
-      max: 1
-
-    - name: bootstrap_plot_edge_label_size
-      title: Edge label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
-
-    - name: bootstrap_plot_node_size
-      title: Node size
-      type: Number
-      default: 1
-      min: 0
-      max: 2
-
-    - name: bootstrap_plot_node_label_size
-      title: Node label size
-      type: Number
-      default: 1
-      min: 0
-      max: 10
 
     ### PERMUTATION
 
