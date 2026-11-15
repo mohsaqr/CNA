@@ -1,7 +1,7 @@
 ---
 title: Co-occurrence Network Analysis
 name: CNA
-version: 1.0.0
+version: 1.1.0
 jms: '1.0'
 authors:
   - Dylan Girault
@@ -9,13 +9,15 @@ authors:
   - Santtu Tikka
   - Sonsoles López-Pernas
 maintainer: Sonsoles López-Pernas <sonsoles.lopez@uef.fi>
-date: '2026-03-02'
+date: '2026-11-05'
 type: R
 description: >-
-  Provides tools for performing Co-occurrence Network Analysis (CNA) supporting
-  long-format and one-hot encoded data, with optional group comparison and
-  automatic clustering. Includes centrality measures, community detection,
-  clique analysis, bootstrap validation, and permutation testing.
+  Co-occurrence Network Analysis (CNA) of event (long-format), one-hot (binary)
+  and delimited (keyword) data, built on Nestimate and cograph. Single networks,
+  group comparison and clustering; centrality and its stability, community
+  detection, edge betweenness, cliques and the clique complex, backbone
+  extraction, link prediction, association rules, bootstrap validation,
+  permutation tests and network comparison.
 analyses:
   - title: Event Data (Single/Group)
     name: CNAEventSingle
@@ -45,18 +47,84 @@ analyses:
     menuSubgroup: Binary Data
     menuTitle: Clustering
     category: analyses
+  - title: Delimited Data (Keywords / Items)
+    name: CNADelimited
+    ns: CNA
+    menuGroup: Co-occurrence Network Analysis
+    menuSubgroup: Delimited Data
+    menuTitle: Keywords / Items
+    category: analyses
 usesNative: true
 minApp: 1.8.0
 datasets:
   - name: Regulation_long
     path: Regulation_long.csv
     description: >-
-      Regulation data in long format. Contains Actor, Achievers, Group, Time,
-      and Action columns. Actions include: cohesion, consensus, discuss,
-      synthesis, and more.
+      Real. Group regulation actions in collaborative learning, long format:
+      Actor, Achievers, Group, Time and Action. For the Event Data analyses.
     tags:
       - CNA
-      - co-occurrence
+      - event data
       - long format
+      - real
+  - name: Regulation_sessions
+    path: Regulation_sessions.csv
+    description: >-
+      Real. The Regulation_long sessions as action lists (one row per session,
+      actions separated by ';'). For the Delimited Data analysis (Item Columns:
+      Actions).
+    tags:
+      - CNA
+      - delimited
+      - real
+  - name: SRL_events
+    path: SRL_events.csv
+    description: >-
+      Simulated (simulab). Self-regulated learning event log: 8 actions, 200
+      students in two groups with different learning cycles (Strategic:
+      plan-read-summarise-monitor- evaluate-reflect; Surface:
+      read-review-practice), courses, achievement, Time and Order. For the Event
+      Data analyses, group comparison and the mixed network.
+    tags:
+      - CNA
+      - event data
+      - self-regulated learning
+      - simulated
+  - name: SRL_onehot
+    path: SRL_onehot.csv
+    description: >-
+      Simulated (simulab). The SRL_events log coded 0/1: one row per episode of
+      four consecutive events, one column per action, with Actor, Group, Course,
+      Achievement and Episode. For the Binary Data analyses and the mixed
+      network (Actor = Actor, window size 1).
+    tags:
+      - CNA
+      - one-hot
+      - binary
+      - self-regulated learning
+      - simulated
+  - name: LearningActivities
+    path: LearningActivities.csv
+    description: >-
+      Simulated (Nestimate::learning_activities). 0/1 indicators of six online
+      learning activities for 200 students over 30 time points. For the Binary
+      Data analyses (Actor = Student) and clustering.
+    tags:
+      - CNA
+      - one-hot
+      - binary
+      - simulated
+  - name: HumanAI_turns
+    path: HumanAI_turns.csv
+    description: >-
+      Real (Saqr, 2026; Nestimate::human_long and ai_long). Human-AI
+      pair-programming turns from 429 sessions: the turn's codes as a '; ' list
+      (Codes) and as 17 0/1 columns, with Session, Project, Speaker and Turn.
+      For the Delimited and the Binary Data analyses (Group = Speaker).
+    tags:
+      - CNA
+      - delimited
+      - one-hot
+      - real
 
 ...

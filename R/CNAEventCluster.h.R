@@ -7,63 +7,126 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     public = list(
         initialize = function(
             buildModel_variables_long_action = NULL,
+            buildModel_variables_actor = NULL,
             buildModel_variables_long_time = NULL,
             buildModel_variables_long_order = NULL,
-            buildModel_variables_actor = NULL,
-            clustering_k = 2,
             clustering_run = FALSE,
+            clustering_k = 2,
             clustering_dissimilarity = "hamming",
             clustering_method = "pam",
             buildModel_scaling = "noScaling",
             buildModel_threshold = 900,
             buildModel_show_matrix = FALSE,
+            buildModel_show_summary = FALSE,
+            seed_set = FALSE,
+            seed_value = 1234,
+            cluster_show_diagnostics = FALSE,
+            cluster_show_diagnostics_plot = FALSE,
+            cluster_show_choice = FALSE,
+            cluster_show_choice_plot = FALSE,
+            cluster_choice_kmin = 2,
+            cluster_choice_kmax = 6,
             buildModel_show_plot = TRUE,
             buildModel_show_histo = FALSE,
             buildModel_show_frequencies = FALSE,
             buildModel_show_mosaic = FALSE,
-            buildModel_show_distribution = FALSE,
-            centrality_loops = FALSE,
-            centrality_normalize = FALSE,
+            buildModel_show_mixed = FALSE,
+            buildModel_mixed_type = "group",
+            plot_layout = "oval",
+            plot_edge_labels = TRUE,
+            plot_minimum = 0,
+            plot_cut = 0,
+            plot_edge_label_size = 0.8,
+            plot_node_size = 0,
+            plot_label_size = 0,
             centrality_show_table = FALSE,
             centrality_show_plot = FALSE,
             centrality_plot_style = "lollipop",
+            centrality_loops = FALSE,
+            centrality_normalize = FALSE,
+            centrality_invert = TRUE,
+            centrality_Strength = TRUE,
+            centrality_Degree = FALSE,
+            centrality_Coreness = FALSE,
             centrality_Betweenness = TRUE,
+            centrality_BetweennessRSP = FALSE,
             centrality_Closeness = FALSE,
-            centrality_InStrength = TRUE,
-            centrality_OutStrength = TRUE,
+            centrality_Harmonic = FALSE,
+            centrality_Eccentricity = FALSE,
+            centrality_Eigenvector = FALSE,
+            centrality_PageRank = FALSE,
+            centrality_Diffusion = FALSE,
+            centrality_Clustering = FALSE,
+            centrality_Constraint = FALSE,
+            centrality_EffectiveSize = FALSE,
+            edgebetweenness_show_table = FALSE,
+            edgebetweenness_show_plot = FALSE,
+            edgebetweenness_invert = TRUE,
             community_methods = "louvain",
             community_gamma = 1,
             community_show_table = FALSE,
             community_show_plot = FALSE,
-            stability_show_table = FALSE,
-            stability_show_plot = FALSE,
-            stability_iter = 500,
-            stability_threshold = 0.7,
+            cliques_show_table = FALSE,
+            cliques_show_plot = FALSE,
+            cliques_show_complex = FALSE,
+            cliques_size = 3,
+            cliques_threshold = 0,
+            cliques_max_plot = 9,
+            backbone_show_plot = FALSE,
+            backbone_show_table = FALSE,
+            backbone_method = "disparity",
+            backbone_level = 0.5,
+            backbone_threshold = 0,
+            backbone_lowest = 0.05,
+            links_show_table = FALSE,
+            links_method = "resource_allocation",
+            links_exclude_existing = TRUE,
+            links_threshold = 0,
+            links_top_n = 20,
+            rules_show_table = FALSE,
+            rules_show_plot = FALSE,
+            rules_min_support = 0.1,
+            rules_min_confidence = 0.5,
+            rules_min_lift = 1,
+            rules_max_length = 5,
+            rules_max_rows = 50,
             bootstrap_iteration = 1000,
             bootstrap_level = 0.05,
             bootstrap_method = "stability",
             bootstrap_range_low = 0.75,
             bootstrap_range_up = 1.25,
-            bootstrap_threshold = 0.1,
+            bootstrap_set_threshold = FALSE,
+            bootstrap_threshold = 0,
+            bootstrap_ci_method = "percentile",
             bootstrap_show_plot = FALSE,
             bootstrap_show_table = FALSE,
             bootstrap_table_max_rows = 20,
             bootstrap_table_show_all = FALSE,
             bootstrap_table_significant_only = FALSE,
+            stability_show_table = FALSE,
+            stability_show_plot = FALSE,
+            stability_iter = 1000,
+            stability_threshold = 0.7,
+            stability_certainty = 0.95,
+            stability_method = "pearson",
             permutation_show_table = FALSE,
             permutation_show_plot = FALSE,
             permutation_iter = 1000,
             permutation_paired = FALSE,
             permutation_level = 0.05,
+            permutation_adjust = "none",
             permutation_table_max_rows = 50,
             permutation_table_show_all = FALSE,
             compare_show_summary = FALSE,
             compare_show_network = FALSE,
+            compare_show_edges = FALSE,
             compare_show_plot = FALSE,
+            compare_show_diff_plot = FALSE,
             compare_cluster_i = 1,
             compare_cluster_j = 2,
             compare_scaling = "none",
-            compare_plot_type = "heatmap", ...) {
+            compare_plot_type = "scatter",
+            compare_edges_max_rows = 50, ...) {
 
             super$initialize(
                 package="CNA",
@@ -74,46 +137,53 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..buildModel_variables_long_action <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_action",
                 buildModel_variables_long_action)
+            private$..buildModel_variables_actor <- jmvcore::OptionVariable$new(
+                "buildModel_variables_actor",
+                buildModel_variables_actor)
             private$..buildModel_variables_long_time <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_time",
                 buildModel_variables_long_time)
             private$..buildModel_variables_long_order <- jmvcore::OptionVariable$new(
                 "buildModel_variables_long_order",
                 buildModel_variables_long_order)
-            private$..buildModel_variables_actor <- jmvcore::OptionVariable$new(
-                "buildModel_variables_actor",
-                buildModel_variables_actor)
+            private$..clustering_run <- jmvcore::OptionBool$new(
+                "clustering_run",
+                clustering_run,
+                default=FALSE)
             private$..clustering_k <- jmvcore::OptionInteger$new(
                 "clustering_k",
                 clustering_k,
                 default=2,
                 min=2,
                 max=20)
-            private$..clustering_run <- jmvcore::OptionBool$new(
-                "clustering_run",
-                clustering_run,
-                default=FALSE)
             private$..clustering_dissimilarity <- jmvcore::OptionList$new(
                 "clustering_dissimilarity",
                 clustering_dissimilarity,
-                default="hamming",
                 options=list(
                     "hamming",
                     "osa",
                     "lv",
+                    "dl",
                     "lcs",
+                    "qgram",
+                    "cosine",
                     "jaccard",
-                    "jw"))
+                    "jw"),
+                default="hamming")
             private$..clustering_method <- jmvcore::OptionList$new(
                 "clustering_method",
                 clustering_method,
-                default="pam",
                 options=list(
                     "pam",
+                    "ward.D",
                     "ward.D2",
                     "complete",
                     "average",
-                    "single"))
+                    "single",
+                    "mcquitty",
+                    "median",
+                    "centroid"),
+                default="pam")
             private$..buildModel_scaling <- jmvcore::OptionList$new(
                 "buildModel_scaling",
                 buildModel_scaling,
@@ -131,6 +201,47 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "buildModel_show_matrix",
                 buildModel_show_matrix,
                 default=FALSE)
+            private$..buildModel_show_summary <- jmvcore::OptionBool$new(
+                "buildModel_show_summary",
+                buildModel_show_summary,
+                default=FALSE)
+            private$..seed_set <- jmvcore::OptionBool$new(
+                "seed_set",
+                seed_set,
+                default=FALSE)
+            private$..seed_value <- jmvcore::OptionInteger$new(
+                "seed_value",
+                seed_value,
+                default=1234,
+                min=0)
+            private$..cluster_show_diagnostics <- jmvcore::OptionBool$new(
+                "cluster_show_diagnostics",
+                cluster_show_diagnostics,
+                default=FALSE)
+            private$..cluster_show_diagnostics_plot <- jmvcore::OptionBool$new(
+                "cluster_show_diagnostics_plot",
+                cluster_show_diagnostics_plot,
+                default=FALSE)
+            private$..cluster_show_choice <- jmvcore::OptionBool$new(
+                "cluster_show_choice",
+                cluster_show_choice,
+                default=FALSE)
+            private$..cluster_show_choice_plot <- jmvcore::OptionBool$new(
+                "cluster_show_choice_plot",
+                cluster_show_choice_plot,
+                default=FALSE)
+            private$..cluster_choice_kmin <- jmvcore::OptionInteger$new(
+                "cluster_choice_kmin",
+                cluster_choice_kmin,
+                default=2,
+                min=2,
+                max=20)
+            private$..cluster_choice_kmax <- jmvcore::OptionInteger$new(
+                "cluster_choice_kmax",
+                cluster_choice_kmax,
+                default=6,
+                min=2,
+                max=20)
             private$..buildModel_show_plot <- jmvcore::OptionBool$new(
                 "buildModel_show_plot",
                 buildModel_show_plot,
@@ -147,18 +258,62 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "buildModel_show_mosaic",
                 buildModel_show_mosaic,
                 default=FALSE)
-            private$..buildModel_show_distribution <- jmvcore::OptionBool$new(
-                "buildModel_show_distribution",
-                buildModel_show_distribution,
+            private$..buildModel_show_mixed <- jmvcore::OptionBool$new(
+                "buildModel_show_mixed",
+                buildModel_show_mixed,
                 default=FALSE)
-            private$..centrality_loops <- jmvcore::OptionBool$new(
-                "centrality_loops",
-                centrality_loops,
-                default=FALSE)
-            private$..centrality_normalize <- jmvcore::OptionBool$new(
-                "centrality_normalize",
-                centrality_normalize,
-                default=FALSE)
+            private$..buildModel_mixed_type <- jmvcore::OptionList$new(
+                "buildModel_mixed_type",
+                buildModel_mixed_type,
+                options=list(
+                    "group",
+                    "overlay"),
+                default="group")
+            private$..plot_layout <- jmvcore::OptionList$new(
+                "plot_layout",
+                plot_layout,
+                options=list(
+                    "oval",
+                    "circle",
+                    "spring",
+                    "fr",
+                    "gephi_fr",
+                    "star",
+                    "grid",
+                    "random"),
+                default="oval")
+            private$..plot_edge_labels <- jmvcore::OptionBool$new(
+                "plot_edge_labels",
+                plot_edge_labels,
+                default=TRUE)
+            private$..plot_minimum <- jmvcore::OptionNumber$new(
+                "plot_minimum",
+                plot_minimum,
+                default=0,
+                min=0)
+            private$..plot_cut <- jmvcore::OptionNumber$new(
+                "plot_cut",
+                plot_cut,
+                default=0,
+                min=0)
+            private$..plot_edge_label_size <- jmvcore::OptionNumber$new(
+                "plot_edge_label_size",
+                plot_edge_label_size,
+                default=0.8,
+                min=0.1,
+                max=5)
+            private$..plot_node_size <- jmvcore::OptionNumber$new(
+                "plot_node_size",
+                plot_node_size,
+                default=0,
+                min=0,
+                max=30)
+            private$..plot_label_size <- jmvcore::OptionNumber$new(
+                "plot_label_size",
+                plot_label_size,
+                default=0,
+                min=0,
+                max=5)
             private$..centrality_show_table <- jmvcore::OptionBool$new(
                 "centrality_show_table",
                 centrality_show_table,
@@ -170,42 +325,110 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..centrality_plot_style <- jmvcore::OptionList$new(
                 "centrality_plot_style",
                 centrality_plot_style,
-                default="lollipop",
                 options=list(
                     "lollipop",
                     "bar",
                     "line",
                     "dot",
                     "heatmap",
-                    "distribution"))
+                    "distribution"),
+                default="lollipop")
+            private$..centrality_loops <- jmvcore::OptionBool$new(
+                "centrality_loops",
+                centrality_loops,
+                default=FALSE)
+            private$..centrality_normalize <- jmvcore::OptionBool$new(
+                "centrality_normalize",
+                centrality_normalize,
+                default=FALSE)
+            private$..centrality_invert <- jmvcore::OptionBool$new(
+                "centrality_invert",
+                centrality_invert,
+                default=TRUE)
+            private$..centrality_Strength <- jmvcore::OptionBool$new(
+                "centrality_Strength",
+                centrality_Strength,
+                default=TRUE)
+            private$..centrality_Degree <- jmvcore::OptionBool$new(
+                "centrality_Degree",
+                centrality_Degree,
+                default=FALSE)
+            private$..centrality_Coreness <- jmvcore::OptionBool$new(
+                "centrality_Coreness",
+                centrality_Coreness,
+                default=FALSE)
             private$..centrality_Betweenness <- jmvcore::OptionBool$new(
                 "centrality_Betweenness",
                 centrality_Betweenness,
                 default=TRUE)
+            private$..centrality_BetweennessRSP <- jmvcore::OptionBool$new(
+                "centrality_BetweennessRSP",
+                centrality_BetweennessRSP,
+                default=FALSE)
             private$..centrality_Closeness <- jmvcore::OptionBool$new(
                 "centrality_Closeness",
                 centrality_Closeness,
                 default=FALSE)
-            private$..centrality_InStrength <- jmvcore::OptionBool$new(
-                "centrality_InStrength",
-                centrality_InStrength,
-                default=TRUE)
-            private$..centrality_OutStrength <- jmvcore::OptionBool$new(
-                "centrality_OutStrength",
-                centrality_OutStrength,
+            private$..centrality_Harmonic <- jmvcore::OptionBool$new(
+                "centrality_Harmonic",
+                centrality_Harmonic,
+                default=FALSE)
+            private$..centrality_Eccentricity <- jmvcore::OptionBool$new(
+                "centrality_Eccentricity",
+                centrality_Eccentricity,
+                default=FALSE)
+            private$..centrality_Eigenvector <- jmvcore::OptionBool$new(
+                "centrality_Eigenvector",
+                centrality_Eigenvector,
+                default=FALSE)
+            private$..centrality_PageRank <- jmvcore::OptionBool$new(
+                "centrality_PageRank",
+                centrality_PageRank,
+                default=FALSE)
+            private$..centrality_Diffusion <- jmvcore::OptionBool$new(
+                "centrality_Diffusion",
+                centrality_Diffusion,
+                default=FALSE)
+            private$..centrality_Clustering <- jmvcore::OptionBool$new(
+                "centrality_Clustering",
+                centrality_Clustering,
+                default=FALSE)
+            private$..centrality_Constraint <- jmvcore::OptionBool$new(
+                "centrality_Constraint",
+                centrality_Constraint,
+                default=FALSE)
+            private$..centrality_EffectiveSize <- jmvcore::OptionBool$new(
+                "centrality_EffectiveSize",
+                centrality_EffectiveSize,
+                default=FALSE)
+            private$..edgebetweenness_show_table <- jmvcore::OptionBool$new(
+                "edgebetweenness_show_table",
+                edgebetweenness_show_table,
+                default=FALSE)
+            private$..edgebetweenness_show_plot <- jmvcore::OptionBool$new(
+                "edgebetweenness_show_plot",
+                edgebetweenness_show_plot,
+                default=FALSE)
+            private$..edgebetweenness_invert <- jmvcore::OptionBool$new(
+                "edgebetweenness_invert",
+                edgebetweenness_invert,
                 default=TRUE)
             private$..community_methods <- jmvcore::OptionList$new(
                 "community_methods",
                 community_methods,
-                default="louvain",
                 options=list(
                     "louvain",
+                    "leiden",
                     "walktrap",
                     "fast_greedy",
-                    "label_prop",
                     "infomap",
-                    "leiden"))
-            private$..community_gamma <- jmvcore::OptionInteger$new(
+                    "label_propagation",
+                    "edge_betweenness",
+                    "leading_eigenvector",
+                    "spinglass",
+                    "optimal"),
+                default="louvain")
+            private$..community_gamma <- jmvcore::OptionNumber$new(
                 "community_gamma",
                 community_gamma,
                 default=1,
@@ -219,31 +442,140 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "community_show_plot",
                 community_show_plot,
                 default=FALSE)
-            private$..stability_show_table <- jmvcore::OptionBool$new(
-                "stability_show_table",
-                stability_show_table,
+            private$..cliques_show_table <- jmvcore::OptionBool$new(
+                "cliques_show_table",
+                cliques_show_table,
                 default=FALSE)
-            private$..stability_show_plot <- jmvcore::OptionBool$new(
-                "stability_show_plot",
-                stability_show_plot,
+            private$..cliques_show_plot <- jmvcore::OptionBool$new(
+                "cliques_show_plot",
+                cliques_show_plot,
                 default=FALSE)
-            private$..stability_iter <- jmvcore::OptionInteger$new(
-                "stability_iter",
-                stability_iter,
-                default=500,
-                min=50,
-                max=5000)
-            private$..stability_threshold <- jmvcore::OptionNumber$new(
-                "stability_threshold",
-                stability_threshold,
-                default=0.7,
+            private$..cliques_show_complex <- jmvcore::OptionBool$new(
+                "cliques_show_complex",
+                cliques_show_complex,
+                default=FALSE)
+            private$..cliques_size <- jmvcore::OptionInteger$new(
+                "cliques_size",
+                cliques_size,
+                default=3,
+                min=2,
+                max=10)
+            private$..cliques_threshold <- jmvcore::OptionNumber$new(
+                "cliques_threshold",
+                cliques_threshold,
+                default=0,
+                min=0)
+            private$..cliques_max_plot <- jmvcore::OptionInteger$new(
+                "cliques_max_plot",
+                cliques_max_plot,
+                default=9,
+                min=1,
+                max=50)
+            private$..backbone_show_plot <- jmvcore::OptionBool$new(
+                "backbone_show_plot",
+                backbone_show_plot,
+                default=FALSE)
+            private$..backbone_show_table <- jmvcore::OptionBool$new(
+                "backbone_show_table",
+                backbone_show_table,
+                default=FALSE)
+            private$..backbone_method <- jmvcore::OptionList$new(
+                "backbone_method",
+                backbone_method,
+                options=list(
+                    "disparity",
+                    "threshold",
+                    "lowest"),
+                default="disparity")
+            private$..backbone_level <- jmvcore::OptionNumber$new(
+                "backbone_level",
+                backbone_level,
+                default=0.5,
                 min=0,
                 max=1)
+            private$..backbone_threshold <- jmvcore::OptionNumber$new(
+                "backbone_threshold",
+                backbone_threshold,
+                default=0,
+                min=0)
+            private$..backbone_lowest <- jmvcore::OptionNumber$new(
+                "backbone_lowest",
+                backbone_lowest,
+                default=0.05,
+                min=0,
+                max=1)
+            private$..links_show_table <- jmvcore::OptionBool$new(
+                "links_show_table",
+                links_show_table,
+                default=FALSE)
+            private$..links_method <- jmvcore::OptionList$new(
+                "links_method",
+                links_method,
+                options=list(
+                    "resource_allocation",
+                    "adamic_adar",
+                    "common_neighbors",
+                    "jaccard",
+                    "preferential_attachment",
+                    "katz"),
+                default="resource_allocation")
+            private$..links_exclude_existing <- jmvcore::OptionBool$new(
+                "links_exclude_existing",
+                links_exclude_existing,
+                default=TRUE)
+            private$..links_threshold <- jmvcore::OptionNumber$new(
+                "links_threshold",
+                links_threshold,
+                default=0,
+                min=0)
+            private$..links_top_n <- jmvcore::OptionInteger$new(
+                "links_top_n",
+                links_top_n,
+                default=20,
+                min=1,
+                max=1000)
+            private$..rules_show_table <- jmvcore::OptionBool$new(
+                "rules_show_table",
+                rules_show_table,
+                default=FALSE)
+            private$..rules_show_plot <- jmvcore::OptionBool$new(
+                "rules_show_plot",
+                rules_show_plot,
+                default=FALSE)
+            private$..rules_min_support <- jmvcore::OptionNumber$new(
+                "rules_min_support",
+                rules_min_support,
+                default=0.1,
+                min=0,
+                max=1)
+            private$..rules_min_confidence <- jmvcore::OptionNumber$new(
+                "rules_min_confidence",
+                rules_min_confidence,
+                default=0.5,
+                min=0,
+                max=1)
+            private$..rules_min_lift <- jmvcore::OptionNumber$new(
+                "rules_min_lift",
+                rules_min_lift,
+                default=1,
+                min=0)
+            private$..rules_max_length <- jmvcore::OptionInteger$new(
+                "rules_max_length",
+                rules_max_length,
+                default=5,
+                min=2,
+                max=10)
+            private$..rules_max_rows <- jmvcore::OptionInteger$new(
+                "rules_max_rows",
+                rules_max_rows,
+                default=50,
+                min=1,
+                max=5000)
             private$..bootstrap_iteration <- jmvcore::OptionInteger$new(
                 "bootstrap_iteration",
                 bootstrap_iteration,
                 default=1000,
-                min=0,
+                min=10,
                 max=10000)
             private$..bootstrap_level <- jmvcore::OptionNumber$new(
                 "bootstrap_level",
@@ -254,10 +586,10 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..bootstrap_method <- jmvcore::OptionList$new(
                 "bootstrap_method",
                 bootstrap_method,
-                default="stability",
                 options=list(
                     "stability",
-                    "threshold"))
+                    "threshold"),
+                default="stability")
             private$..bootstrap_range_low <- jmvcore::OptionNumber$new(
                 "bootstrap_range_low",
                 bootstrap_range_low,
@@ -270,12 +602,22 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=1.25,
                 min=0,
                 max=10)
+            private$..bootstrap_set_threshold <- jmvcore::OptionBool$new(
+                "bootstrap_set_threshold",
+                bootstrap_set_threshold,
+                default=FALSE)
             private$..bootstrap_threshold <- jmvcore::OptionNumber$new(
                 "bootstrap_threshold",
                 bootstrap_threshold,
-                default=0.1,
-                min=0,
-                max=1)
+                default=0,
+                min=0)
+            private$..bootstrap_ci_method <- jmvcore::OptionList$new(
+                "bootstrap_ci_method",
+                bootstrap_ci_method,
+                options=list(
+                    "percentile",
+                    "basic"),
+                default="percentile")
             private$..bootstrap_show_plot <- jmvcore::OptionBool$new(
                 "bootstrap_show_plot",
                 bootstrap_show_plot,
@@ -298,6 +640,40 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "bootstrap_table_significant_only",
                 bootstrap_table_significant_only,
                 default=FALSE)
+            private$..stability_show_table <- jmvcore::OptionBool$new(
+                "stability_show_table",
+                stability_show_table,
+                default=FALSE)
+            private$..stability_show_plot <- jmvcore::OptionBool$new(
+                "stability_show_plot",
+                stability_show_plot,
+                default=FALSE)
+            private$..stability_iter <- jmvcore::OptionInteger$new(
+                "stability_iter",
+                stability_iter,
+                default=1000,
+                min=50,
+                max=5000)
+            private$..stability_threshold <- jmvcore::OptionNumber$new(
+                "stability_threshold",
+                stability_threshold,
+                default=0.7,
+                min=0,
+                max=1)
+            private$..stability_certainty <- jmvcore::OptionNumber$new(
+                "stability_certainty",
+                stability_certainty,
+                default=0.95,
+                min=0,
+                max=1)
+            private$..stability_method <- jmvcore::OptionList$new(
+                "stability_method",
+                stability_method,
+                options=list(
+                    "pearson",
+                    "spearman",
+                    "kendall"),
+                default="pearson")
             private$..permutation_show_table <- jmvcore::OptionBool$new(
                 "permutation_show_table",
                 permutation_show_table,
@@ -310,7 +686,7 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "permutation_iter",
                 permutation_iter,
                 default=1000,
-                min=1,
+                min=10,
                 max=10000)
             private$..permutation_paired <- jmvcore::OptionBool$new(
                 "permutation_paired",
@@ -322,6 +698,19 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 default=0.05,
                 min=0,
                 max=1)
+            private$..permutation_adjust <- jmvcore::OptionList$new(
+                "permutation_adjust",
+                permutation_adjust,
+                options=list(
+                    "none",
+                    "holm",
+                    "hochberg",
+                    "hommel",
+                    "bonferroni",
+                    "BH",
+                    "BY",
+                    "fdr"),
+                default="none")
             private$..permutation_table_max_rows <- jmvcore::OptionInteger$new(
                 "permutation_table_max_rows",
                 permutation_table_max_rows,
@@ -340,9 +729,17 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "compare_show_network",
                 compare_show_network,
                 default=FALSE)
+            private$..compare_show_edges <- jmvcore::OptionBool$new(
+                "compare_show_edges",
+                compare_show_edges,
+                default=FALSE)
             private$..compare_show_plot <- jmvcore::OptionBool$new(
                 "compare_show_plot",
                 compare_show_plot,
+                default=FALSE)
+            private$..compare_show_diff_plot <- jmvcore::OptionBool$new(
+                "compare_show_diff_plot",
+                compare_show_diff_plot,
                 default=FALSE)
             private$..compare_cluster_i <- jmvcore::OptionInteger$new(
                 "compare_cluster_i",
@@ -359,198 +756,395 @@ CNAEventClusterOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..compare_scaling <- jmvcore::OptionList$new(
                 "compare_scaling",
                 compare_scaling,
-                default="none",
                 options=list(
                     "none",
                     "minmax",
                     "max",
-                    "rank"))
+                    "rank"),
+                default="none")
             private$..compare_plot_type <- jmvcore::OptionList$new(
                 "compare_plot_type",
                 compare_plot_type,
-                default="heatmap",
                 options=list(
+                    "scatter",
                     "heatmap",
-                    "scatterplot",
-                    "weight_density"))
+                    "diff_hist",
+                    "weight_dist",
+                    "all"),
+                default="scatter")
+            private$..compare_edges_max_rows <- jmvcore::OptionInteger$new(
+                "compare_edges_max_rows",
+                compare_edges_max_rows,
+                default=50,
+                min=1,
+                max=5000)
 
             self$.addOption(private$..buildModel_variables_long_action)
+            self$.addOption(private$..buildModel_variables_actor)
             self$.addOption(private$..buildModel_variables_long_time)
             self$.addOption(private$..buildModel_variables_long_order)
-            self$.addOption(private$..buildModel_variables_actor)
-            self$.addOption(private$..clustering_k)
             self$.addOption(private$..clustering_run)
+            self$.addOption(private$..clustering_k)
             self$.addOption(private$..clustering_dissimilarity)
             self$.addOption(private$..clustering_method)
             self$.addOption(private$..buildModel_scaling)
             self$.addOption(private$..buildModel_threshold)
             self$.addOption(private$..buildModel_show_matrix)
+            self$.addOption(private$..buildModel_show_summary)
+            self$.addOption(private$..seed_set)
+            self$.addOption(private$..seed_value)
+            self$.addOption(private$..cluster_show_diagnostics)
+            self$.addOption(private$..cluster_show_diagnostics_plot)
+            self$.addOption(private$..cluster_show_choice)
+            self$.addOption(private$..cluster_show_choice_plot)
+            self$.addOption(private$..cluster_choice_kmin)
+            self$.addOption(private$..cluster_choice_kmax)
             self$.addOption(private$..buildModel_show_plot)
             self$.addOption(private$..buildModel_show_histo)
             self$.addOption(private$..buildModel_show_frequencies)
             self$.addOption(private$..buildModel_show_mosaic)
-            self$.addOption(private$..buildModel_show_distribution)
-            self$.addOption(private$..centrality_loops)
-            self$.addOption(private$..centrality_normalize)
+            self$.addOption(private$..buildModel_show_mixed)
+            self$.addOption(private$..buildModel_mixed_type)
+            self$.addOption(private$..plot_layout)
+            self$.addOption(private$..plot_edge_labels)
+            self$.addOption(private$..plot_minimum)
+            self$.addOption(private$..plot_cut)
+            self$.addOption(private$..plot_edge_label_size)
+            self$.addOption(private$..plot_node_size)
+            self$.addOption(private$..plot_label_size)
             self$.addOption(private$..centrality_show_table)
             self$.addOption(private$..centrality_show_plot)
             self$.addOption(private$..centrality_plot_style)
+            self$.addOption(private$..centrality_loops)
+            self$.addOption(private$..centrality_normalize)
+            self$.addOption(private$..centrality_invert)
+            self$.addOption(private$..centrality_Strength)
+            self$.addOption(private$..centrality_Degree)
+            self$.addOption(private$..centrality_Coreness)
             self$.addOption(private$..centrality_Betweenness)
+            self$.addOption(private$..centrality_BetweennessRSP)
             self$.addOption(private$..centrality_Closeness)
-            self$.addOption(private$..centrality_InStrength)
-            self$.addOption(private$..centrality_OutStrength)
+            self$.addOption(private$..centrality_Harmonic)
+            self$.addOption(private$..centrality_Eccentricity)
+            self$.addOption(private$..centrality_Eigenvector)
+            self$.addOption(private$..centrality_PageRank)
+            self$.addOption(private$..centrality_Diffusion)
+            self$.addOption(private$..centrality_Clustering)
+            self$.addOption(private$..centrality_Constraint)
+            self$.addOption(private$..centrality_EffectiveSize)
+            self$.addOption(private$..edgebetweenness_show_table)
+            self$.addOption(private$..edgebetweenness_show_plot)
+            self$.addOption(private$..edgebetweenness_invert)
             self$.addOption(private$..community_methods)
             self$.addOption(private$..community_gamma)
             self$.addOption(private$..community_show_table)
             self$.addOption(private$..community_show_plot)
-            self$.addOption(private$..stability_show_table)
-            self$.addOption(private$..stability_show_plot)
-            self$.addOption(private$..stability_iter)
-            self$.addOption(private$..stability_threshold)
+            self$.addOption(private$..cliques_show_table)
+            self$.addOption(private$..cliques_show_plot)
+            self$.addOption(private$..cliques_show_complex)
+            self$.addOption(private$..cliques_size)
+            self$.addOption(private$..cliques_threshold)
+            self$.addOption(private$..cliques_max_plot)
+            self$.addOption(private$..backbone_show_plot)
+            self$.addOption(private$..backbone_show_table)
+            self$.addOption(private$..backbone_method)
+            self$.addOption(private$..backbone_level)
+            self$.addOption(private$..backbone_threshold)
+            self$.addOption(private$..backbone_lowest)
+            self$.addOption(private$..links_show_table)
+            self$.addOption(private$..links_method)
+            self$.addOption(private$..links_exclude_existing)
+            self$.addOption(private$..links_threshold)
+            self$.addOption(private$..links_top_n)
+            self$.addOption(private$..rules_show_table)
+            self$.addOption(private$..rules_show_plot)
+            self$.addOption(private$..rules_min_support)
+            self$.addOption(private$..rules_min_confidence)
+            self$.addOption(private$..rules_min_lift)
+            self$.addOption(private$..rules_max_length)
+            self$.addOption(private$..rules_max_rows)
             self$.addOption(private$..bootstrap_iteration)
             self$.addOption(private$..bootstrap_level)
             self$.addOption(private$..bootstrap_method)
             self$.addOption(private$..bootstrap_range_low)
             self$.addOption(private$..bootstrap_range_up)
+            self$.addOption(private$..bootstrap_set_threshold)
             self$.addOption(private$..bootstrap_threshold)
+            self$.addOption(private$..bootstrap_ci_method)
             self$.addOption(private$..bootstrap_show_plot)
             self$.addOption(private$..bootstrap_show_table)
             self$.addOption(private$..bootstrap_table_max_rows)
             self$.addOption(private$..bootstrap_table_show_all)
             self$.addOption(private$..bootstrap_table_significant_only)
+            self$.addOption(private$..stability_show_table)
+            self$.addOption(private$..stability_show_plot)
+            self$.addOption(private$..stability_iter)
+            self$.addOption(private$..stability_threshold)
+            self$.addOption(private$..stability_certainty)
+            self$.addOption(private$..stability_method)
             self$.addOption(private$..permutation_show_table)
             self$.addOption(private$..permutation_show_plot)
             self$.addOption(private$..permutation_iter)
             self$.addOption(private$..permutation_paired)
             self$.addOption(private$..permutation_level)
+            self$.addOption(private$..permutation_adjust)
             self$.addOption(private$..permutation_table_max_rows)
             self$.addOption(private$..permutation_table_show_all)
             self$.addOption(private$..compare_show_summary)
             self$.addOption(private$..compare_show_network)
+            self$.addOption(private$..compare_show_edges)
             self$.addOption(private$..compare_show_plot)
+            self$.addOption(private$..compare_show_diff_plot)
             self$.addOption(private$..compare_cluster_i)
             self$.addOption(private$..compare_cluster_j)
             self$.addOption(private$..compare_scaling)
             self$.addOption(private$..compare_plot_type)
+            self$.addOption(private$..compare_edges_max_rows)
         }),
     active = list(
         buildModel_variables_long_action = function() private$..buildModel_variables_long_action$value,
+        buildModel_variables_actor = function() private$..buildModel_variables_actor$value,
         buildModel_variables_long_time = function() private$..buildModel_variables_long_time$value,
         buildModel_variables_long_order = function() private$..buildModel_variables_long_order$value,
-        buildModel_variables_actor = function() private$..buildModel_variables_actor$value,
-        clustering_k = function() private$..clustering_k$value,
         clustering_run = function() private$..clustering_run$value,
+        clustering_k = function() private$..clustering_k$value,
         clustering_dissimilarity = function() private$..clustering_dissimilarity$value,
         clustering_method = function() private$..clustering_method$value,
         buildModel_scaling = function() private$..buildModel_scaling$value,
         buildModel_threshold = function() private$..buildModel_threshold$value,
         buildModel_show_matrix = function() private$..buildModel_show_matrix$value,
+        buildModel_show_summary = function() private$..buildModel_show_summary$value,
+        seed_set = function() private$..seed_set$value,
+        seed_value = function() private$..seed_value$value,
+        cluster_show_diagnostics = function() private$..cluster_show_diagnostics$value,
+        cluster_show_diagnostics_plot = function() private$..cluster_show_diagnostics_plot$value,
+        cluster_show_choice = function() private$..cluster_show_choice$value,
+        cluster_show_choice_plot = function() private$..cluster_show_choice_plot$value,
+        cluster_choice_kmin = function() private$..cluster_choice_kmin$value,
+        cluster_choice_kmax = function() private$..cluster_choice_kmax$value,
         buildModel_show_plot = function() private$..buildModel_show_plot$value,
         buildModel_show_histo = function() private$..buildModel_show_histo$value,
         buildModel_show_frequencies = function() private$..buildModel_show_frequencies$value,
         buildModel_show_mosaic = function() private$..buildModel_show_mosaic$value,
-        buildModel_show_distribution = function() private$..buildModel_show_distribution$value,
-        centrality_loops = function() private$..centrality_loops$value,
-        centrality_normalize = function() private$..centrality_normalize$value,
+        buildModel_show_mixed = function() private$..buildModel_show_mixed$value,
+        buildModel_mixed_type = function() private$..buildModel_mixed_type$value,
+        plot_layout = function() private$..plot_layout$value,
+        plot_edge_labels = function() private$..plot_edge_labels$value,
+        plot_minimum = function() private$..plot_minimum$value,
+        plot_cut = function() private$..plot_cut$value,
+        plot_edge_label_size = function() private$..plot_edge_label_size$value,
+        plot_node_size = function() private$..plot_node_size$value,
+        plot_label_size = function() private$..plot_label_size$value,
         centrality_show_table = function() private$..centrality_show_table$value,
         centrality_show_plot = function() private$..centrality_show_plot$value,
         centrality_plot_style = function() private$..centrality_plot_style$value,
+        centrality_loops = function() private$..centrality_loops$value,
+        centrality_normalize = function() private$..centrality_normalize$value,
+        centrality_invert = function() private$..centrality_invert$value,
+        centrality_Strength = function() private$..centrality_Strength$value,
+        centrality_Degree = function() private$..centrality_Degree$value,
+        centrality_Coreness = function() private$..centrality_Coreness$value,
         centrality_Betweenness = function() private$..centrality_Betweenness$value,
+        centrality_BetweennessRSP = function() private$..centrality_BetweennessRSP$value,
         centrality_Closeness = function() private$..centrality_Closeness$value,
-        centrality_InStrength = function() private$..centrality_InStrength$value,
-        centrality_OutStrength = function() private$..centrality_OutStrength$value,
+        centrality_Harmonic = function() private$..centrality_Harmonic$value,
+        centrality_Eccentricity = function() private$..centrality_Eccentricity$value,
+        centrality_Eigenvector = function() private$..centrality_Eigenvector$value,
+        centrality_PageRank = function() private$..centrality_PageRank$value,
+        centrality_Diffusion = function() private$..centrality_Diffusion$value,
+        centrality_Clustering = function() private$..centrality_Clustering$value,
+        centrality_Constraint = function() private$..centrality_Constraint$value,
+        centrality_EffectiveSize = function() private$..centrality_EffectiveSize$value,
+        edgebetweenness_show_table = function() private$..edgebetweenness_show_table$value,
+        edgebetweenness_show_plot = function() private$..edgebetweenness_show_plot$value,
+        edgebetweenness_invert = function() private$..edgebetweenness_invert$value,
         community_methods = function() private$..community_methods$value,
         community_gamma = function() private$..community_gamma$value,
         community_show_table = function() private$..community_show_table$value,
         community_show_plot = function() private$..community_show_plot$value,
-        stability_show_table = function() private$..stability_show_table$value,
-        stability_show_plot = function() private$..stability_show_plot$value,
-        stability_iter = function() private$..stability_iter$value,
-        stability_threshold = function() private$..stability_threshold$value,
+        cliques_show_table = function() private$..cliques_show_table$value,
+        cliques_show_plot = function() private$..cliques_show_plot$value,
+        cliques_show_complex = function() private$..cliques_show_complex$value,
+        cliques_size = function() private$..cliques_size$value,
+        cliques_threshold = function() private$..cliques_threshold$value,
+        cliques_max_plot = function() private$..cliques_max_plot$value,
+        backbone_show_plot = function() private$..backbone_show_plot$value,
+        backbone_show_table = function() private$..backbone_show_table$value,
+        backbone_method = function() private$..backbone_method$value,
+        backbone_level = function() private$..backbone_level$value,
+        backbone_threshold = function() private$..backbone_threshold$value,
+        backbone_lowest = function() private$..backbone_lowest$value,
+        links_show_table = function() private$..links_show_table$value,
+        links_method = function() private$..links_method$value,
+        links_exclude_existing = function() private$..links_exclude_existing$value,
+        links_threshold = function() private$..links_threshold$value,
+        links_top_n = function() private$..links_top_n$value,
+        rules_show_table = function() private$..rules_show_table$value,
+        rules_show_plot = function() private$..rules_show_plot$value,
+        rules_min_support = function() private$..rules_min_support$value,
+        rules_min_confidence = function() private$..rules_min_confidence$value,
+        rules_min_lift = function() private$..rules_min_lift$value,
+        rules_max_length = function() private$..rules_max_length$value,
+        rules_max_rows = function() private$..rules_max_rows$value,
         bootstrap_iteration = function() private$..bootstrap_iteration$value,
         bootstrap_level = function() private$..bootstrap_level$value,
         bootstrap_method = function() private$..bootstrap_method$value,
         bootstrap_range_low = function() private$..bootstrap_range_low$value,
         bootstrap_range_up = function() private$..bootstrap_range_up$value,
+        bootstrap_set_threshold = function() private$..bootstrap_set_threshold$value,
         bootstrap_threshold = function() private$..bootstrap_threshold$value,
+        bootstrap_ci_method = function() private$..bootstrap_ci_method$value,
         bootstrap_show_plot = function() private$..bootstrap_show_plot$value,
         bootstrap_show_table = function() private$..bootstrap_show_table$value,
         bootstrap_table_max_rows = function() private$..bootstrap_table_max_rows$value,
         bootstrap_table_show_all = function() private$..bootstrap_table_show_all$value,
         bootstrap_table_significant_only = function() private$..bootstrap_table_significant_only$value,
+        stability_show_table = function() private$..stability_show_table$value,
+        stability_show_plot = function() private$..stability_show_plot$value,
+        stability_iter = function() private$..stability_iter$value,
+        stability_threshold = function() private$..stability_threshold$value,
+        stability_certainty = function() private$..stability_certainty$value,
+        stability_method = function() private$..stability_method$value,
         permutation_show_table = function() private$..permutation_show_table$value,
         permutation_show_plot = function() private$..permutation_show_plot$value,
         permutation_iter = function() private$..permutation_iter$value,
         permutation_paired = function() private$..permutation_paired$value,
         permutation_level = function() private$..permutation_level$value,
+        permutation_adjust = function() private$..permutation_adjust$value,
         permutation_table_max_rows = function() private$..permutation_table_max_rows$value,
         permutation_table_show_all = function() private$..permutation_table_show_all$value,
         compare_show_summary = function() private$..compare_show_summary$value,
         compare_show_network = function() private$..compare_show_network$value,
+        compare_show_edges = function() private$..compare_show_edges$value,
         compare_show_plot = function() private$..compare_show_plot$value,
+        compare_show_diff_plot = function() private$..compare_show_diff_plot$value,
         compare_cluster_i = function() private$..compare_cluster_i$value,
         compare_cluster_j = function() private$..compare_cluster_j$value,
         compare_scaling = function() private$..compare_scaling$value,
-        compare_plot_type = function() private$..compare_plot_type$value),
+        compare_plot_type = function() private$..compare_plot_type$value,
+        compare_edges_max_rows = function() private$..compare_edges_max_rows$value),
     private = list(
         ..buildModel_variables_long_action = NA,
+        ..buildModel_variables_actor = NA,
         ..buildModel_variables_long_time = NA,
         ..buildModel_variables_long_order = NA,
-        ..buildModel_variables_actor = NA,
-        ..clustering_k = NA,
         ..clustering_run = NA,
+        ..clustering_k = NA,
         ..clustering_dissimilarity = NA,
         ..clustering_method = NA,
         ..buildModel_scaling = NA,
         ..buildModel_threshold = NA,
         ..buildModel_show_matrix = NA,
+        ..buildModel_show_summary = NA,
+        ..seed_set = NA,
+        ..seed_value = NA,
+        ..cluster_show_diagnostics = NA,
+        ..cluster_show_diagnostics_plot = NA,
+        ..cluster_show_choice = NA,
+        ..cluster_show_choice_plot = NA,
+        ..cluster_choice_kmin = NA,
+        ..cluster_choice_kmax = NA,
         ..buildModel_show_plot = NA,
         ..buildModel_show_histo = NA,
         ..buildModel_show_frequencies = NA,
         ..buildModel_show_mosaic = NA,
-        ..buildModel_show_distribution = NA,
-        ..centrality_loops = NA,
-        ..centrality_normalize = NA,
+        ..buildModel_show_mixed = NA,
+        ..buildModel_mixed_type = NA,
+        ..plot_layout = NA,
+        ..plot_edge_labels = NA,
+        ..plot_minimum = NA,
+        ..plot_cut = NA,
+        ..plot_edge_label_size = NA,
+        ..plot_node_size = NA,
+        ..plot_label_size = NA,
         ..centrality_show_table = NA,
         ..centrality_show_plot = NA,
         ..centrality_plot_style = NA,
+        ..centrality_loops = NA,
+        ..centrality_normalize = NA,
+        ..centrality_invert = NA,
+        ..centrality_Strength = NA,
+        ..centrality_Degree = NA,
+        ..centrality_Coreness = NA,
         ..centrality_Betweenness = NA,
+        ..centrality_BetweennessRSP = NA,
         ..centrality_Closeness = NA,
-        ..centrality_InStrength = NA,
-        ..centrality_OutStrength = NA,
+        ..centrality_Harmonic = NA,
+        ..centrality_Eccentricity = NA,
+        ..centrality_Eigenvector = NA,
+        ..centrality_PageRank = NA,
+        ..centrality_Diffusion = NA,
+        ..centrality_Clustering = NA,
+        ..centrality_Constraint = NA,
+        ..centrality_EffectiveSize = NA,
+        ..edgebetweenness_show_table = NA,
+        ..edgebetweenness_show_plot = NA,
+        ..edgebetweenness_invert = NA,
         ..community_methods = NA,
         ..community_gamma = NA,
         ..community_show_table = NA,
         ..community_show_plot = NA,
-        ..stability_show_table = NA,
-        ..stability_show_plot = NA,
-        ..stability_iter = NA,
-        ..stability_threshold = NA,
+        ..cliques_show_table = NA,
+        ..cliques_show_plot = NA,
+        ..cliques_show_complex = NA,
+        ..cliques_size = NA,
+        ..cliques_threshold = NA,
+        ..cliques_max_plot = NA,
+        ..backbone_show_plot = NA,
+        ..backbone_show_table = NA,
+        ..backbone_method = NA,
+        ..backbone_level = NA,
+        ..backbone_threshold = NA,
+        ..backbone_lowest = NA,
+        ..links_show_table = NA,
+        ..links_method = NA,
+        ..links_exclude_existing = NA,
+        ..links_threshold = NA,
+        ..links_top_n = NA,
+        ..rules_show_table = NA,
+        ..rules_show_plot = NA,
+        ..rules_min_support = NA,
+        ..rules_min_confidence = NA,
+        ..rules_min_lift = NA,
+        ..rules_max_length = NA,
+        ..rules_max_rows = NA,
         ..bootstrap_iteration = NA,
         ..bootstrap_level = NA,
         ..bootstrap_method = NA,
         ..bootstrap_range_low = NA,
         ..bootstrap_range_up = NA,
+        ..bootstrap_set_threshold = NA,
         ..bootstrap_threshold = NA,
+        ..bootstrap_ci_method = NA,
         ..bootstrap_show_plot = NA,
         ..bootstrap_show_table = NA,
         ..bootstrap_table_max_rows = NA,
         ..bootstrap_table_show_all = NA,
         ..bootstrap_table_significant_only = NA,
+        ..stability_show_table = NA,
+        ..stability_show_plot = NA,
+        ..stability_iter = NA,
+        ..stability_threshold = NA,
+        ..stability_certainty = NA,
+        ..stability_method = NA,
         ..permutation_show_table = NA,
         ..permutation_show_plot = NA,
         ..permutation_iter = NA,
         ..permutation_paired = NA,
         ..permutation_level = NA,
+        ..permutation_adjust = NA,
         ..permutation_table_max_rows = NA,
         ..permutation_table_show_all = NA,
         ..compare_show_summary = NA,
         ..compare_show_network = NA,
+        ..compare_show_edges = NA,
         ..compare_show_plot = NA,
+        ..compare_show_diff_plot = NA,
         ..compare_cluster_i = NA,
         ..compare_cluster_j = NA,
         ..compare_scaling = NA,
-        ..compare_plot_type = NA)
+        ..compare_plot_type = NA,
+        ..compare_edges_max_rows = NA)
 )
 
 CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -558,50 +1152,77 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
-        clusteringNote = function() private$.items[["clusteringNote"]],
         errorText = function() private$.items[["errorText"]],
-        tnaTitle = function() private$.items[["tnaTitle"]],
+        clusteringNote = function() private$.items[["clusteringNote"]],
+        analysisTitle = function() private$.items[["analysisTitle"]],
         buildModelTitle = function() private$.items[["buildModelTitle"]],
         buildModelContent = function() private$.items[["buildModelContent"]],
+        buildModel_matrixTable = function() private$.items[["buildModel_matrixTable"]],
+        buildModel_summaryTable = function() private$.items[["buildModel_summaryTable"]],
+        clusterTitle = function() private$.items[["clusterTitle"]],
+        clusterDiagTable = function() private$.items[["clusterDiagTable"]],
+        clusterDiag_plot = function() private$.items[["clusterDiag_plot"]],
+        clusterChoiceState = function() private$.items[["clusterChoiceState"]],
+        clusterChoiceTable = function() private$.items[["clusterChoiceTable"]],
+        clusterChoice_plot = function() private$.items[["clusterChoice_plot"]],
         buildModel_plot = function() private$.items[["buildModel_plot"]],
+        buildModel_mixedState = function() private$.items[["buildModel_mixedState"]],
+        buildModel_mixed = function() private$.items[["buildModel_mixed"]],
         buildModel_histo = function() private$.items[["buildModel_histo"]],
         buildModel_frequencies = function() private$.items[["buildModel_frequencies"]],
         buildModel_mosaic = function() private$.items[["buildModel_mosaic"]],
-        buildModel_distribution = function() private$.items[["buildModel_distribution"]],
         centralityTitle = function() private$.items[["centralityTitle"]],
         centralityTable = function() private$.items[["centralityTable"]],
         centrality_plot = function() private$.items[["centrality_plot"]],
+        edgeBetweennessTitle = function() private$.items[["edgeBetweennessTitle"]],
+        edgeBetweennessTable = function() private$.items[["edgeBetweennessTable"]],
+        edgeBetweenness_plot = function() private$.items[["edgeBetweenness_plot"]],
         communityTitle = function() private$.items[["communityTitle"]],
-        communityErrorText = function() private$.items[["communityErrorText"]],
-        communityContent = function() private$.items[["communityContent"]],
+        communityState = function() private$.items[["communityState"]],
         communityTable = function() private$.items[["communityTable"]],
         community_plot = function() private$.items[["community_plot"]],
+        cliquesTitle = function() private$.items[["cliquesTitle"]],
+        cliquesState = function() private$.items[["cliquesState"]],
+        cliquesTable = function() private$.items[["cliquesTable"]],
+        cliquesComplexTable = function() private$.items[["cliquesComplexTable"]],
+        cliques_plot = function() private$.items[["cliques_plot"]],
+        backboneTitle = function() private$.items[["backboneTitle"]],
+        backboneState = function() private$.items[["backboneState"]],
+        backboneTable = function() private$.items[["backboneTable"]],
+        backbone_plot = function() private$.items[["backbone_plot"]],
+        linksTitle = function() private$.items[["linksTitle"]],
+        linksTable = function() private$.items[["linksTable"]],
+        rulesTitle = function() private$.items[["rulesTitle"]],
+        rulesState = function() private$.items[["rulesState"]],
+        rulesTable = function() private$.items[["rulesTable"]],
+        rules_plot = function() private$.items[["rules_plot"]],
         bootstrapTitle = function() private$.items[["bootstrapTitle"]],
+        bootstrapState = function() private$.items[["bootstrapState"]],
         bootstrapTable = function() private$.items[["bootstrapTable"]],
         bootstrap_plot = function() private$.items[["bootstrap_plot"]],
-        permutationTitle = function() private$.items[["permutationTitle"]],
-        permutationTable = function() private$.items[["permutationTable"]],
-        permutation_plot = function() private$.items[["permutation_plot"]],
-        compareInstructions = function() private$.items[["compareInstructions"]],
-        compareTitle = function() private$.items[["compareTitle"]],
-        compareSummaryTable = function() private$.items[["compareSummaryTable"]],
-        compareNetworkTable = function() private$.items[["compareNetworkTable"]],
-        compare_plot = function() private$.items[["compare_plot"]],
         stabilityTitle = function() private$.items[["stabilityTitle"]],
+        stabilityState = function() private$.items[["stabilityState"]],
         stabilityTable = function() private$.items[["stabilityTable"]],
         reliabilityTable = function() private$.items[["reliabilityTable"]],
-        stability_plot = function() private$.items[["stability_plot"]]),
+        stability_plot = function() private$.items[["stability_plot"]],
+        permutationTitle = function() private$.items[["permutationTitle"]],
+        permutationState = function() private$.items[["permutationState"]],
+        permutationTable = function() private$.items[["permutationTable"]],
+        permutation_plot = function() private$.items[["permutation_plot"]],
+        compareTitle = function() private$.items[["compareTitle"]],
+        compareState = function() private$.items[["compareState"]],
+        compareSummaryTable = function() private$.items[["compareSummaryTable"]],
+        compareNetworkTable = function() private$.items[["compareNetworkTable"]],
+        compareEdgeTable = function() private$.items[["compareEdgeTable"]],
+        compare_plot = function() private$.items[["compare_plot"]],
+        compare_diff_plot = function() private$.items[["compare_diff_plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
             super$initialize(
                 options=options,
                 name="",
-                title="Event Data (Clustering)",
-                refs=list(
-                    "JTNA",
-                    "TNA",
-                    "TNALAK"))
+                title="Event Data (Clustering)")
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -609,14 +1230,9 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible=TRUE,
                 clearWith=list(
                     "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
                     "buildModel_variables_long_time",
-                    "buildModel_variables_long_order",
-                    "buildModel_variables_actor")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="clusteringNote",
-                title="Clustering Note",
-                visible=FALSE))
+                    "buildModel_variables_long_order")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="errorText",
@@ -624,19 +1240,33 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 visible=FALSE,
                 clearWith=list(
                     "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
                     "buildModel_variables_long_time",
                     "buildModel_variables_long_order",
-                    "buildModel_variables_actor")))
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clusteringNote",
+                visible=FALSE,
+                clearWith=list(
+                    "clustering_run")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="tnaTitle",
-                title="Event Data (Clustering)",
+                name="analysisTitle",
+                title="Event Data (Clustering) \u2014 CNA 1.1.0",
                 visible=TRUE))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="buildModelTitle",
-                title="Model",
-                visible=TRUE))
+                title="Network",
+                visible="(buildModel_show_matrix || buildModel_show_summary || buildModel_show_plot || buildModel_show_histo || buildModel_show_frequencies || buildModel_show_mosaic || buildModel_show_mixed)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="buildModelContent",
@@ -648,17 +1278,221 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="buildModel_matrixTable",
+                title="Co-occurrence Matrix",
+                visible="(buildModel_show_matrix)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="state", 
+                        `title`="State", 
+                        `type`="text")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="buildModel_summaryTable",
+                title="Network Summary",
+                visible="(buildModel_show_summary)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="clusterTitle",
+                title="Clustering",
+                visible="(cluster_show_diagnostics || cluster_show_diagnostics_plot || cluster_show_choice || cluster_show_choice_plot)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusterDiagTable",
+                title="Cluster Diagnostics",
+                visible="(cluster_show_diagnostics)",
+                columns=list(
+                    list(
+                        `name`="cluster", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="size", 
+                        `title`="Size", 
+                        `type`="integer"),
+                    list(
+                        `name`="pct", 
+                        `title`="%", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_within_dist", 
+                        `title`="Mean within distance", 
+                        `type`="number"),
+                    list(
+                        `name`="silhouette", 
+                        `title`="Mean silhouette", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="clusterDiag_plot",
+                width=600,
+                height=450,
+                visible="(cluster_show_diagnostics_plot)",
+                renderFun=".render_clusterDiag_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="clusterChoiceState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cluster_choice_kmin",
+                    "cluster_choice_kmax")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="clusterChoiceTable",
+                title="Choosing the Number of Clusters",
+                visible="(cluster_show_choice)",
+                columns=list(
+                    list(
+                        `name`="k", 
+                        `title`="k", 
+                        `type`="integer"),
+                    list(
+                        `name`="silhouette", 
+                        `title`="Mean silhouette", 
+                        `type`="number"),
+                    list(
+                        `name`="mean_within_dist", 
+                        `title`="Mean within distance", 
+                        `type`="number"),
+                    list(
+                        `name`="min_size", 
+                        `title`="Smallest cluster", 
+                        `type`="integer"),
+                    list(
+                        `name`="max_size", 
+                        `title`="Largest cluster", 
+                        `type`="integer"),
+                    list(
+                        `name`="size_ratio", 
+                        `title`="Size ratio", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cluster_choice_kmin",
+                    "cluster_choice_kmax")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="clusterChoice_plot",
+                width=700,
+                height=450,
+                visible="(cluster_show_choice_plot)",
+                renderFun=".render_clusterChoice_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cluster_choice_kmin",
+                    "cluster_choice_kmax")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_plot",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showBuildModelPlot",
+                visible="(buildModel_show_plot)",
+                renderFun=".render_buildModel_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -666,17 +1500,71 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="buildModel_mixedState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="buildModel_mixed",
+                width=900,
+                height=450,
+                visible="(buildModel_show_mixed)",
+                renderFun=".render_buildModel_mixed",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size",
+                    "buildModel_mixed_type")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_histo",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showBuildModelHisto",
+                visible="(buildModel_show_histo)",
+                renderFun=".render_buildModel_histo",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -684,17 +1572,19 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_frequencies",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showBuildModelFrequencies",
+                visible="(buildModel_show_frequencies)",
+                renderFun=".render_buildModel_frequencies",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -702,17 +1592,19 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="buildModel_mosaic",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showBuildModelMosaic",
+                visible="(buildModel_show_mosaic)",
+                renderFun=".render_buildModel_mosaic",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -720,42 +1612,26 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "clustering_k",
                     "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
-            self$add(jmvcore::Image$new(
-                options=options,
-                name="buildModel_distribution",
-                width=600,
-                height=450,
-                visible=FALSE,
-                renderFun=".showBuildModelDistribution",
-                clearWith=list(
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_order",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
                     "clustering_k",
-                    "clustering_run",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="centralityTitle",
                 title="Centrality",
-                visible=FALSE))
+                visible="(centrality_show_table || centrality_show_plot)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="centralityTable",
                 title="Centrality Measures",
-                visible=FALSE,
+                visible="(centrality_show_table)",
                 columns=list(
                     list(
                         `name`="group", 
-                        `title`="Group", 
+                        `title`="Cluster", 
                         `type`="text"),
                     list(
                         `name`="state", 
@@ -768,23 +1644,36 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "centrality_loops",
                     "centrality_normalize",
-                    "centrality_OutStrength",
-                    "centrality_InStrength",
-                    "centrality_Closeness",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
                     "centrality_Betweenness",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="centrality_plot",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showCentralityPlot",
+                visible="(centrality_show_plot)",
+                renderFun=".render_centrality_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -792,43 +1681,368 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "centrality_loops",
                     "centrality_normalize",
-                    "centrality_OutStrength",
-                    "centrality_InStrength",
-                    "centrality_Closeness",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
                     "centrality_Betweenness",
-                    "clustering_k",
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize",
+                    "centrality_plot_style")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="edgeBetweennessTitle",
+                title="Edge Betweenness",
+                visible="(edgebetweenness_show_table || edgebetweenness_show_plot)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="edgeBetweennessTable",
+                title="Edge Betweenness",
+                visible="(edgebetweenness_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weight", 
+                        `type`="number"),
+                    list(
+                        `name`="betweenness", 
+                        `title`="Edge betweenness", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "edgebetweenness_invert")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="edgeBetweenness_plot",
+                width=600,
+                height=450,
+                visible="(edgebetweenness_show_plot)",
+                renderFun=".render_edgeBetweenness_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "edgebetweenness_invert",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="communityTitle",
                 title="Community Detection",
-                visible=FALSE))
+                visible="(community_show_table || community_show_plot)"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="communityErrorText",
-                title="",
-                visible=FALSE))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="communityContent",
-                visible=FALSE))
+                name="communityState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "community_methods",
+                    "community_gamma")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="communityTable",
                 title="Community Assignments",
-                visible=FALSE,
+                visible="(community_show_table)",
                 columns=list(
                     list(
                         `name`="group", 
-                        `title`="Group", 
+                        `title`="Cluster", 
                         `type`="text"),
                     list(
                         `name`="state", 
                         `title`="State", 
+                        `type`="text"),
+                    list(
+                        `name`="community", 
+                        `title`="Community", 
+                        `type`="integer")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "community_methods",
+                    "community_gamma")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="community_plot",
+                width=600,
+                height=450,
+                visible="(community_show_plot)",
+                renderFun=".render_community_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "community_methods",
+                    "community_gamma",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cliquesTitle",
+                title="Cliques",
+                visible="(cliques_show_table || cliques_show_plot || cliques_show_complex)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="cliquesState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cliques_size",
+                    "cliques_threshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cliquesTable",
+                title="Cliques",
+                visible="(cliques_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="clique", 
+                        `title`="Clique", 
+                        `type`="integer"),
+                    list(
+                        `name`="members", 
+                        `title`="Members", 
+                        `type`="text"),
+                    list(
+                        `name`="mean_weight", 
+                        `title`="Mean weight", 
+                        `type`="number"),
+                    list(
+                        `name`="min_weight", 
+                        `title`="Minimum weight", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cliques_size",
+                    "cliques_threshold")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cliquesComplexTable",
+                title="Clique Complex",
+                visible="(cliques_show_complex)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cliques_size",
+                    "cliques_threshold")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="cliques_plot",
+                width=750,
+                height=750,
+                visible="(cliques_show_plot)",
+                renderFun=".render_cliques_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "cliques_size",
+                    "cliques_threshold",
+                    "cliques_max_plot",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="backboneTitle",
+                title="Backbone Extraction",
+                visible="(backbone_show_plot || backbone_show_table)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="backboneState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "backbone_method",
+                    "backbone_level",
+                    "backbone_threshold",
+                    "backbone_lowest")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="backboneTable",
+                title="Backbone Edges",
+                visible="(backbone_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="weight", 
+                        `title`="Weight", 
+                        `type`="number"),
+                    list(
+                        `name`="status", 
+                        `title`="Status", 
                         `type`="text")),
                 clearWith=list(
                     "buildModel_variables_long_action",
@@ -837,19 +2051,23 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "community_methods",
-                    "community_gamma",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "backbone_method",
+                    "backbone_level",
+                    "backbone_threshold",
+                    "backbone_lowest")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="community_plot",
+                name="backbone_plot",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showCommunityPlot",
+                visible="(backbone_show_plot)",
+                renderFun=".render_backbone_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -857,26 +2075,220 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "community_methods",
-                    "community_gamma",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "backbone_method",
+                    "backbone_level",
+                    "backbone_threshold",
+                    "backbone_lowest",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="linksTitle",
+                title="Link Prediction",
+                visible="(links_show_table)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="linksTable",
+                title="Predicted Links",
+                visible="(links_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="score", 
+                        `title`="Score", 
+                        `type`="number"),
+                    list(
+                        `name`="rank", 
+                        `title`="Rank", 
+                        `type`="integer"),
+                    list(
+                        `name`="existing", 
+                        `title`="Existing edge", 
+                        `type`="text")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "links_method",
+                    "links_exclude_existing",
+                    "links_threshold",
+                    "links_top_n")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="rulesTitle",
+                title="Association Rules",
+                visible="(rules_show_table || rules_show_plot)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="rulesState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "rules_min_support",
+                    "rules_min_confidence",
+                    "rules_min_lift",
+                    "rules_max_length")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="rulesTable",
+                title="Association Rules",
+                visible="(rules_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="antecedent", 
+                        `title`="If (antecedent)", 
+                        `type`="text"),
+                    list(
+                        `name`="consequent", 
+                        `title`="Then (consequent)", 
+                        `type`="text"),
+                    list(
+                        `name`="support", 
+                        `title`="Support", 
+                        `type`="number"),
+                    list(
+                        `name`="confidence", 
+                        `title`="Confidence", 
+                        `type`="number"),
+                    list(
+                        `name`="lift", 
+                        `title`="Lift", 
+                        `type`="number"),
+                    list(
+                        `name`="conviction", 
+                        `title`="Conviction", 
+                        `type`="number"),
+                    list(
+                        `name`="count", 
+                        `title`="Count", 
+                        `type`="integer")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "rules_min_support",
+                    "rules_min_confidence",
+                    "rules_min_lift",
+                    "rules_max_length",
+                    "rules_max_rows")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="rules_plot",
+                width=700,
+                height=450,
+                visible="(rules_show_plot)",
+                renderFun=".render_rules_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "rules_min_support",
+                    "rules_min_confidence",
+                    "rules_min_lift",
+                    "rules_max_length")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="bootstrapTitle",
                 title="Bootstrap",
-                visible=FALSE))
+                visible="(bootstrap_show_table || bootstrap_show_plot)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="bootstrapState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "bootstrap_iteration",
+                    "bootstrap_level",
+                    "bootstrap_method",
+                    "bootstrap_range_low",
+                    "bootstrap_range_up",
+                    "bootstrap_set_threshold",
+                    "bootstrap_threshold",
+                    "bootstrap_ci_method")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="bootstrapTable",
                 title="Bootstrap Results",
-                visible=FALSE,
+                visible="(bootstrap_show_table)",
                 columns=list(
                     list(
                         `name`="group", 
-                        `title`="Group", 
+                        `title`="Cluster", 
                         `type`="text"),
                     list(
                         `name`="from", 
@@ -922,23 +2334,30 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
                     "bootstrap_range_low",
                     "bootstrap_range_up",
+                    "bootstrap_set_threshold",
                     "bootstrap_threshold",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
+                    "bootstrap_ci_method",
+                    "bootstrap_table_significant_only",
+                    "bootstrap_table_show_all",
+                    "bootstrap_table_max_rows")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="bootstrap_plot",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showBootstrapPlot",
+                visible="(bootstrap_show_plot)",
+                renderFun=".render_bootstrap_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -946,26 +2365,246 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "bootstrap_iteration",
                     "bootstrap_level",
                     "bootstrap_method",
                     "bootstrap_range_low",
                     "bootstrap_range_up",
+                    "bootstrap_set_threshold",
                     "bootstrap_threshold",
-                    "clustering_k",
+                    "bootstrap_ci_method",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="stabilityTitle",
+                title="Reliability & Stability",
+                visible="(stability_show_table || stability_show_plot)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="stabilityState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
-                    "clustering_method")))
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "centrality_loops",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
+                    "centrality_Betweenness",
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize",
+                    "stability_iter",
+                    "stability_threshold",
+                    "stability_certainty",
+                    "stability_method")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="stabilityTable",
+                title="Centrality Stability (CS-coefficients)",
+                visible="(stability_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="measure", 
+                        `title`="Measure", 
+                        `type`="text"),
+                    list(
+                        `name`="cs", 
+                        `title`="CS-coefficient", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "centrality_loops",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
+                    "centrality_Betweenness",
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize",
+                    "stability_iter",
+                    "stability_threshold",
+                    "stability_certainty",
+                    "stability_method")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="reliabilityTable",
+                title="Split-half Reliability",
+                visible="(stability_show_table)",
+                columns=list(
+                    list(
+                        `name`="group", 
+                        `title`="Cluster", 
+                        `type`="text"),
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="mean", 
+                        `title`="Mean", 
+                        `type`="number"),
+                    list(
+                        `name`="sd", 
+                        `title`="SD", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "centrality_loops",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
+                    "centrality_Betweenness",
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize",
+                    "stability_iter",
+                    "stability_threshold",
+                    "stability_certainty",
+                    "stability_method")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="stability_plot",
+                width=600,
+                height=450,
+                visible="(stability_show_plot)",
+                renderFun=".render_stability_plot",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "centrality_loops",
+                    "centrality_invert",
+                    "centrality_Strength",
+                    "centrality_Degree",
+                    "centrality_Coreness",
+                    "centrality_Betweenness",
+                    "centrality_BetweennessRSP",
+                    "centrality_Closeness",
+                    "centrality_Harmonic",
+                    "centrality_Eccentricity",
+                    "centrality_Eigenvector",
+                    "centrality_PageRank",
+                    "centrality_Diffusion",
+                    "centrality_Clustering",
+                    "centrality_Constraint",
+                    "centrality_EffectiveSize",
+                    "stability_iter",
+                    "stability_threshold",
+                    "stability_certainty",
+                    "stability_method")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="permutationTitle",
                 title="Permutation Test",
-                visible=FALSE))
+                visible="(permutation_show_table || permutation_show_plot)"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="permutationState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "permutation_iter",
+                    "permutation_paired",
+                    "permutation_level",
+                    "permutation_adjust")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="permutationTable",
                 title="Permutation Test Results",
-                visible=FALSE,
+                visible="(permutation_show_table)",
                 columns=list(
                     list(
                         `name`="group_comparison", 
@@ -995,20 +2634,25 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
+                    "permutation_adjust",
+                    "permutation_table_max_rows",
+                    "permutation_table_show_all")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="permutation_plot",
                 width=600,
                 height=600,
-                visible=FALSE,
-                renderFun=".showPermutationPlot",
+                visible="(permutation_show_plot)",
+                renderFun=".render_permutation_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -1016,29 +2660,74 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "permutation_iter",
                     "permutation_paired",
                     "permutation_level",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="compareInstructions",
-                title="",
-                visible=FALSE))
+                    "permutation_adjust",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="compareTitle",
-                title="",
-                visible=FALSE))
+                title="Comparison",
+                visible="(compare_show_summary || compare_show_network || compare_show_edges || compare_show_plot || compare_show_diff_plot)",
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "compare_cluster_i",
+                    "compare_cluster_j",
+                    "compare_scaling")))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="compareState",
+                visible=FALSE,
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "compare_cluster_i",
+                    "compare_cluster_j",
+                    "compare_scaling")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="compareSummaryTable",
                 title="Summary Metrics",
-                visible=FALSE,
+                visible="(compare_show_summary)",
                 columns=list(
+                    list(
+                        `name`="category", 
+                        `title`="Category", 
+                        `type`="text"),
                     list(
                         `name`="metric", 
                         `title`="Metric", 
@@ -1054,18 +2743,20 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "compare_cluster_i",
                     "compare_cluster_j",
-                    "compare_scaling",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
+                    "compare_scaling")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="compareNetworkTable",
                 title="Network Properties",
-                visible=FALSE,
+                visible="(compare_show_network)",
                 columns=list(
                     list(
                         `name`="metric", 
@@ -1073,11 +2764,11 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `type`="text"),
                     list(
                         `name`="group_i", 
-                        `title`="Group 1", 
+                        `title`="Network 1", 
                         `type`="number"),
                     list(
                         `name`="group_j", 
-                        `title`="Group 2", 
+                        `title`="Network 2", 
                         `type`="number")),
                 clearWith=list(
                     "buildModel_variables_long_action",
@@ -1086,20 +2777,69 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
+                    "compare_cluster_i",
+                    "compare_cluster_j",
+                    "compare_scaling")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="compareEdgeTable",
+                title="Edge Differences",
+                visible="(compare_show_edges)",
+                columns=list(
+                    list(
+                        `name`="from", 
+                        `title`="From", 
+                        `type`="text"),
+                    list(
+                        `name`="to", 
+                        `title`="To", 
+                        `type`="text"),
+                    list(
+                        `name`="weight_i", 
+                        `title`="Network 1", 
+                        `type`="number"),
+                    list(
+                        `name`="weight_j", 
+                        `title`="Network 2", 
+                        `type`="number"),
+                    list(
+                        `name`="difference", 
+                        `title`="Difference", 
+                        `type`="number"),
+                    list(
+                        `name`="relative_difference", 
+                        `title`="Relative difference", 
+                        `type`="number")),
+                clearWith=list(
+                    "buildModel_variables_long_action",
+                    "buildModel_variables_actor",
+                    "buildModel_variables_long_time",
+                    "buildModel_variables_long_order",
+                    "buildModel_scaling",
+                    "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "compare_cluster_i",
                     "compare_cluster_j",
                     "compare_scaling",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
+                    "compare_edges_max_rows")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="compare_plot",
-                width=600,
+                width=700,
                 height=450,
-                visible=FALSE,
-                renderFun=".showComparePlot",
+                visible="(compare_show_plot)",
+                renderFun=".render_compare_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -1107,104 +2847,23 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
+                    "clustering_run",
+                    "clustering_k",
+                    "clustering_dissimilarity",
+                    "clustering_method",
+                    "seed_set",
+                    "seed_value",
                     "compare_cluster_i",
                     "compare_cluster_j",
                     "compare_scaling",
-                    "compare_plot_type",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method")))
-            self$add(jmvcore::Preformatted$new(
-                options=options,
-                name="stabilityTitle",
-                title="Reliability & Stability",
-                visible=FALSE))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="stabilityTable",
-                title="Centrality Stability",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="group", 
-                        `title`="Group", 
-                        `type`="text"),
-                    list(
-                        `name`="measure", 
-                        `title`="Measure", 
-                        `type`="text"),
-                    list(
-                        `name`="cs", 
-                        `title`="CS-coefficient", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_order",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_OutStrength",
-                    "centrality_InStrength",
-                    "centrality_Closeness",
-                    "centrality_Betweenness",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method",
-                    "stability_iter",
-                    "stability_threshold")))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="reliabilityTable",
-                title="Split-half Reliability",
-                visible=FALSE,
-                columns=list(
-                    list(
-                        `name`="group", 
-                        `title`="Group", 
-                        `type`="text"),
-                    list(
-                        `name`="metric", 
-                        `title`="Metric", 
-                        `type`="text"),
-                    list(
-                        `name`="mean", 
-                        `title`="Mean", 
-                        `type`="number"),
-                    list(
-                        `name`="sd", 
-                        `title`="SD", 
-                        `type`="number")),
-                clearWith=list(
-                    "buildModel_variables_long_action",
-                    "buildModel_variables_actor",
-                    "buildModel_variables_long_time",
-                    "buildModel_variables_long_order",
-                    "buildModel_scaling",
-                    "buildModel_threshold",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_OutStrength",
-                    "centrality_InStrength",
-                    "centrality_Closeness",
-                    "centrality_Betweenness",
-                    "clustering_k",
-                    "clustering_run",
-                    "clustering_dissimilarity",
-                    "clustering_method",
-                    "stability_iter")))
+                    "compare_plot_type")))
             self$add(jmvcore::Image$new(
                 options=options,
-                name="stability_plot",
-                title="Centrality Stability",
+                name="compare_diff_plot",
                 width=600,
                 height=450,
-                visible=FALSE,
-                renderFun=".showStabilityPlot",
+                visible="(compare_show_diff_plot)",
+                renderFun=".render_compare_diff_plot",
                 clearWith=list(
                     "buildModel_variables_long_action",
                     "buildModel_variables_actor",
@@ -1212,18 +2871,22 @@ CNAEventClusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "buildModel_variables_long_order",
                     "buildModel_scaling",
                     "buildModel_threshold",
-                    "centrality_loops",
-                    "centrality_normalize",
-                    "centrality_OutStrength",
-                    "centrality_InStrength",
-                    "centrality_Closeness",
-                    "centrality_Betweenness",
-                    "clustering_k",
                     "clustering_run",
+                    "clustering_k",
                     "clustering_dissimilarity",
                     "clustering_method",
-                    "stability_iter",
-                    "stability_threshold")))}))
+                    "seed_set",
+                    "seed_value",
+                    "compare_cluster_i",
+                    "compare_cluster_j",
+                    "compare_scaling",
+                    "plot_layout",
+                    "plot_edge_labels",
+                    "plot_minimum",
+                    "plot_cut",
+                    "plot_edge_label_size",
+                    "plot_node_size",
+                    "plot_label_size")))}))
 
 CNAEventClusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "CNAEventClusterBase",
@@ -1233,7 +2896,7 @@ CNAEventClusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             super$initialize(
                 package = "CNA",
                 name = "CNAEventCluster",
-                version = c(1,0,0),
+                version = c(1,1,0),
                 options = options,
                 results = CNAEventClusterResults$new(options=options),
                 data = data,
@@ -1251,244 +2914,464 @@ CNAEventClusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' 
 #' @param data .
 #' @param buildModel_variables_long_action .
+#' @param buildModel_variables_actor .
 #' @param buildModel_variables_long_time .
 #' @param buildModel_variables_long_order .
-#' @param buildModel_variables_actor .
-#' @param clustering_k .
 #' @param clustering_run .
+#' @param clustering_k .
 #' @param clustering_dissimilarity .
 #' @param clustering_method .
 #' @param buildModel_scaling .
 #' @param buildModel_threshold .
 #' @param buildModel_show_matrix .
+#' @param buildModel_show_summary .
+#' @param seed_set .
+#' @param seed_value .
+#' @param cluster_show_diagnostics .
+#' @param cluster_show_diagnostics_plot .
+#' @param cluster_show_choice .
+#' @param cluster_show_choice_plot .
+#' @param cluster_choice_kmin .
+#' @param cluster_choice_kmax .
 #' @param buildModel_show_plot .
 #' @param buildModel_show_histo .
 #' @param buildModel_show_frequencies .
 #' @param buildModel_show_mosaic .
-#' @param buildModel_show_distribution .
-#' @param centrality_loops .
-#' @param centrality_normalize .
+#' @param buildModel_show_mixed .
+#' @param buildModel_mixed_type .
+#' @param plot_layout .
+#' @param plot_edge_labels .
+#' @param plot_minimum .
+#' @param plot_cut .
+#' @param plot_edge_label_size .
+#' @param plot_node_size .
+#' @param plot_label_size .
 #' @param centrality_show_table .
 #' @param centrality_show_plot .
 #' @param centrality_plot_style .
+#' @param centrality_loops .
+#' @param centrality_normalize .
+#' @param centrality_invert .
+#' @param centrality_Strength .
+#' @param centrality_Degree .
+#' @param centrality_Coreness .
 #' @param centrality_Betweenness .
+#' @param centrality_BetweennessRSP .
 #' @param centrality_Closeness .
-#' @param centrality_InStrength .
-#' @param centrality_OutStrength .
+#' @param centrality_Harmonic .
+#' @param centrality_Eccentricity .
+#' @param centrality_Eigenvector .
+#' @param centrality_PageRank .
+#' @param centrality_Diffusion .
+#' @param centrality_Clustering .
+#' @param centrality_Constraint .
+#' @param centrality_EffectiveSize .
+#' @param edgebetweenness_show_table .
+#' @param edgebetweenness_show_plot .
+#' @param edgebetweenness_invert .
 #' @param community_methods .
 #' @param community_gamma .
 #' @param community_show_table .
 #' @param community_show_plot .
-#' @param stability_show_table .
-#' @param stability_show_plot .
-#' @param stability_iter .
-#' @param stability_threshold .
+#' @param cliques_show_table .
+#' @param cliques_show_plot .
+#' @param cliques_show_complex .
+#' @param cliques_size .
+#' @param cliques_threshold .
+#' @param cliques_max_plot .
+#' @param backbone_show_plot .
+#' @param backbone_show_table .
+#' @param backbone_method .
+#' @param backbone_level .
+#' @param backbone_threshold .
+#' @param backbone_lowest .
+#' @param links_show_table .
+#' @param links_method .
+#' @param links_exclude_existing .
+#' @param links_threshold .
+#' @param links_top_n .
+#' @param rules_show_table .
+#' @param rules_show_plot .
+#' @param rules_min_support .
+#' @param rules_min_confidence .
+#' @param rules_min_lift .
+#' @param rules_max_length .
+#' @param rules_max_rows .
 #' @param bootstrap_iteration .
 #' @param bootstrap_level .
 #' @param bootstrap_method .
 #' @param bootstrap_range_low .
 #' @param bootstrap_range_up .
+#' @param bootstrap_set_threshold .
 #' @param bootstrap_threshold .
+#' @param bootstrap_ci_method .
 #' @param bootstrap_show_plot .
 #' @param bootstrap_show_table .
 #' @param bootstrap_table_max_rows .
 #' @param bootstrap_table_show_all .
 #' @param bootstrap_table_significant_only .
+#' @param stability_show_table .
+#' @param stability_show_plot .
+#' @param stability_iter .
+#' @param stability_threshold .
+#' @param stability_certainty .
+#' @param stability_method .
 #' @param permutation_show_table .
 #' @param permutation_show_plot .
 #' @param permutation_iter .
 #' @param permutation_paired .
 #' @param permutation_level .
+#' @param permutation_adjust .
 #' @param permutation_table_max_rows .
 #' @param permutation_table_show_all .
 #' @param compare_show_summary .
 #' @param compare_show_network .
+#' @param compare_show_edges .
 #' @param compare_show_plot .
+#' @param compare_show_diff_plot .
 #' @param compare_cluster_i .
 #' @param compare_cluster_j .
 #' @param compare_scaling .
 #' @param compare_plot_type .
+#' @param compare_edges_max_rows .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$clusteringNote} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$errorText} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$tnaTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$clusteringNote} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$buildModelContent} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$buildModel_matrixTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$buildModel_summaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$clusterDiagTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterDiag_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$clusterChoiceState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$clusterChoiceTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$clusterChoice_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$buildModel_mixedState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$buildModel_mixed} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_histo} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_frequencies} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$buildModel_mosaic} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$buildModel_distribution} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$centralityTitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$centralityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$centrality_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$edgeBetweennessTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$edgeBetweennessTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$edgeBetweenness_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$communityTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$communityErrorText} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$communityContent} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$communityState} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$communityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$community_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cliquesTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$cliquesState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$cliquesTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cliquesComplexTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$cliques_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$backboneTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$backboneState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$backboneTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$backbone_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$linksTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$linksTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rulesTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$rulesState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$rulesTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$rules_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$bootstrapTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$bootstrapState} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$bootstrapTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bootstrap_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$compareInstructions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$compareTitle} \tab \tab \tab \tab \tab a preformatted \cr
-#'   \code{results$compareSummaryTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$compareNetworkTable} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$compare_plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$stabilityTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$stabilityState} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$stabilityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$reliabilityTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stability_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$permutationTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$permutationState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$permutationTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$permutation_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compareTitle} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$compareState} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$compareSummaryTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compareNetworkTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compareEdgeTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$compare_plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$compare_diff_plot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 #'
-#' \code{results$centralityTable$asDF}
+#' \code{results$buildModel_matrixTable$asDF}
 #'
-#' \code{as.data.frame(results$centralityTable)}
+#' \code{as.data.frame(results$buildModel_matrixTable)}
 #'
 #' @export
 CNAEventCluster <- function(
     data,
     buildModel_variables_long_action,
+    buildModel_variables_actor,
     buildModel_variables_long_time,
     buildModel_variables_long_order,
-    buildModel_variables_actor,
-    clustering_k = 2,
     clustering_run = FALSE,
+    clustering_k = 2,
     clustering_dissimilarity = "hamming",
     clustering_method = "pam",
     buildModel_scaling = "noScaling",
     buildModel_threshold = 900,
     buildModel_show_matrix = FALSE,
+    buildModel_show_summary = FALSE,
+    seed_set = FALSE,
+    seed_value = 1234,
+    cluster_show_diagnostics = FALSE,
+    cluster_show_diagnostics_plot = FALSE,
+    cluster_show_choice = FALSE,
+    cluster_show_choice_plot = FALSE,
+    cluster_choice_kmin = 2,
+    cluster_choice_kmax = 6,
     buildModel_show_plot = TRUE,
     buildModel_show_histo = FALSE,
     buildModel_show_frequencies = FALSE,
     buildModel_show_mosaic = FALSE,
-    buildModel_show_distribution = FALSE,
-    centrality_loops = FALSE,
-    centrality_normalize = FALSE,
+    buildModel_show_mixed = FALSE,
+    buildModel_mixed_type = "group",
+    plot_layout = "oval",
+    plot_edge_labels = TRUE,
+    plot_minimum = 0,
+    plot_cut = 0,
+    plot_edge_label_size = 0.8,
+    plot_node_size = 0,
+    plot_label_size = 0,
     centrality_show_table = FALSE,
     centrality_show_plot = FALSE,
     centrality_plot_style = "lollipop",
+    centrality_loops = FALSE,
+    centrality_normalize = FALSE,
+    centrality_invert = TRUE,
+    centrality_Strength = TRUE,
+    centrality_Degree = FALSE,
+    centrality_Coreness = FALSE,
     centrality_Betweenness = TRUE,
+    centrality_BetweennessRSP = FALSE,
     centrality_Closeness = FALSE,
-    centrality_InStrength = TRUE,
-    centrality_OutStrength = TRUE,
+    centrality_Harmonic = FALSE,
+    centrality_Eccentricity = FALSE,
+    centrality_Eigenvector = FALSE,
+    centrality_PageRank = FALSE,
+    centrality_Diffusion = FALSE,
+    centrality_Clustering = FALSE,
+    centrality_Constraint = FALSE,
+    centrality_EffectiveSize = FALSE,
+    edgebetweenness_show_table = FALSE,
+    edgebetweenness_show_plot = FALSE,
+    edgebetweenness_invert = TRUE,
     community_methods = "louvain",
     community_gamma = 1,
     community_show_table = FALSE,
     community_show_plot = FALSE,
-    stability_show_table = FALSE,
-    stability_show_plot = FALSE,
-    stability_iter = 500,
-    stability_threshold = 0.7,
+    cliques_show_table = FALSE,
+    cliques_show_plot = FALSE,
+    cliques_show_complex = FALSE,
+    cliques_size = 3,
+    cliques_threshold = 0,
+    cliques_max_plot = 9,
+    backbone_show_plot = FALSE,
+    backbone_show_table = FALSE,
+    backbone_method = "disparity",
+    backbone_level = 0.5,
+    backbone_threshold = 0,
+    backbone_lowest = 0.05,
+    links_show_table = FALSE,
+    links_method = "resource_allocation",
+    links_exclude_existing = TRUE,
+    links_threshold = 0,
+    links_top_n = 20,
+    rules_show_table = FALSE,
+    rules_show_plot = FALSE,
+    rules_min_support = 0.1,
+    rules_min_confidence = 0.5,
+    rules_min_lift = 1,
+    rules_max_length = 5,
+    rules_max_rows = 50,
     bootstrap_iteration = 1000,
     bootstrap_level = 0.05,
     bootstrap_method = "stability",
     bootstrap_range_low = 0.75,
     bootstrap_range_up = 1.25,
-    bootstrap_threshold = 0.1,
+    bootstrap_set_threshold = FALSE,
+    bootstrap_threshold = 0,
+    bootstrap_ci_method = "percentile",
     bootstrap_show_plot = FALSE,
     bootstrap_show_table = FALSE,
     bootstrap_table_max_rows = 20,
     bootstrap_table_show_all = FALSE,
     bootstrap_table_significant_only = FALSE,
+    stability_show_table = FALSE,
+    stability_show_plot = FALSE,
+    stability_iter = 1000,
+    stability_threshold = 0.7,
+    stability_certainty = 0.95,
+    stability_method = "pearson",
     permutation_show_table = FALSE,
     permutation_show_plot = FALSE,
     permutation_iter = 1000,
     permutation_paired = FALSE,
     permutation_level = 0.05,
+    permutation_adjust = "none",
     permutation_table_max_rows = 50,
     permutation_table_show_all = FALSE,
     compare_show_summary = FALSE,
     compare_show_network = FALSE,
+    compare_show_edges = FALSE,
     compare_show_plot = FALSE,
+    compare_show_diff_plot = FALSE,
     compare_cluster_i = 1,
     compare_cluster_j = 2,
     compare_scaling = "none",
-    compare_plot_type = "heatmap") {
+    compare_plot_type = "scatter",
+    compare_edges_max_rows = 50) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("CNAEventCluster requires jmvcore to be installed (restart may be required)")
 
     if ( ! missing(buildModel_variables_long_action)) buildModel_variables_long_action <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_action))
+    if ( ! missing(buildModel_variables_actor)) buildModel_variables_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_actor))
     if ( ! missing(buildModel_variables_long_time)) buildModel_variables_long_time <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_time))
     if ( ! missing(buildModel_variables_long_order)) buildModel_variables_long_order <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_long_order))
-    if ( ! missing(buildModel_variables_actor)) buildModel_variables_actor <- jmvcore::resolveQuo(jmvcore::enquo(buildModel_variables_actor))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(buildModel_variables_long_action), buildModel_variables_long_action, NULL),
+            `if`( ! missing(buildModel_variables_actor), buildModel_variables_actor, NULL),
             `if`( ! missing(buildModel_variables_long_time), buildModel_variables_long_time, NULL),
-            `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL),
-            `if`( ! missing(buildModel_variables_actor), buildModel_variables_actor, NULL))
+            `if`( ! missing(buildModel_variables_long_order), buildModel_variables_long_order, NULL))
 
 
     options <- CNAEventClusterOptions$new(
         buildModel_variables_long_action = buildModel_variables_long_action,
+        buildModel_variables_actor = buildModel_variables_actor,
         buildModel_variables_long_time = buildModel_variables_long_time,
         buildModel_variables_long_order = buildModel_variables_long_order,
-        buildModel_variables_actor = buildModel_variables_actor,
-        clustering_k = clustering_k,
         clustering_run = clustering_run,
+        clustering_k = clustering_k,
         clustering_dissimilarity = clustering_dissimilarity,
         clustering_method = clustering_method,
         buildModel_scaling = buildModel_scaling,
         buildModel_threshold = buildModel_threshold,
         buildModel_show_matrix = buildModel_show_matrix,
+        buildModel_show_summary = buildModel_show_summary,
+        seed_set = seed_set,
+        seed_value = seed_value,
+        cluster_show_diagnostics = cluster_show_diagnostics,
+        cluster_show_diagnostics_plot = cluster_show_diagnostics_plot,
+        cluster_show_choice = cluster_show_choice,
+        cluster_show_choice_plot = cluster_show_choice_plot,
+        cluster_choice_kmin = cluster_choice_kmin,
+        cluster_choice_kmax = cluster_choice_kmax,
         buildModel_show_plot = buildModel_show_plot,
         buildModel_show_histo = buildModel_show_histo,
         buildModel_show_frequencies = buildModel_show_frequencies,
         buildModel_show_mosaic = buildModel_show_mosaic,
-        buildModel_show_distribution = buildModel_show_distribution,
-        centrality_loops = centrality_loops,
-        centrality_normalize = centrality_normalize,
+        buildModel_show_mixed = buildModel_show_mixed,
+        buildModel_mixed_type = buildModel_mixed_type,
+        plot_layout = plot_layout,
+        plot_edge_labels = plot_edge_labels,
+        plot_minimum = plot_minimum,
+        plot_cut = plot_cut,
+        plot_edge_label_size = plot_edge_label_size,
+        plot_node_size = plot_node_size,
+        plot_label_size = plot_label_size,
         centrality_show_table = centrality_show_table,
         centrality_show_plot = centrality_show_plot,
         centrality_plot_style = centrality_plot_style,
+        centrality_loops = centrality_loops,
+        centrality_normalize = centrality_normalize,
+        centrality_invert = centrality_invert,
+        centrality_Strength = centrality_Strength,
+        centrality_Degree = centrality_Degree,
+        centrality_Coreness = centrality_Coreness,
         centrality_Betweenness = centrality_Betweenness,
+        centrality_BetweennessRSP = centrality_BetweennessRSP,
         centrality_Closeness = centrality_Closeness,
-        centrality_InStrength = centrality_InStrength,
-        centrality_OutStrength = centrality_OutStrength,
+        centrality_Harmonic = centrality_Harmonic,
+        centrality_Eccentricity = centrality_Eccentricity,
+        centrality_Eigenvector = centrality_Eigenvector,
+        centrality_PageRank = centrality_PageRank,
+        centrality_Diffusion = centrality_Diffusion,
+        centrality_Clustering = centrality_Clustering,
+        centrality_Constraint = centrality_Constraint,
+        centrality_EffectiveSize = centrality_EffectiveSize,
+        edgebetweenness_show_table = edgebetweenness_show_table,
+        edgebetweenness_show_plot = edgebetweenness_show_plot,
+        edgebetweenness_invert = edgebetweenness_invert,
         community_methods = community_methods,
         community_gamma = community_gamma,
         community_show_table = community_show_table,
         community_show_plot = community_show_plot,
-        stability_show_table = stability_show_table,
-        stability_show_plot = stability_show_plot,
-        stability_iter = stability_iter,
-        stability_threshold = stability_threshold,
+        cliques_show_table = cliques_show_table,
+        cliques_show_plot = cliques_show_plot,
+        cliques_show_complex = cliques_show_complex,
+        cliques_size = cliques_size,
+        cliques_threshold = cliques_threshold,
+        cliques_max_plot = cliques_max_plot,
+        backbone_show_plot = backbone_show_plot,
+        backbone_show_table = backbone_show_table,
+        backbone_method = backbone_method,
+        backbone_level = backbone_level,
+        backbone_threshold = backbone_threshold,
+        backbone_lowest = backbone_lowest,
+        links_show_table = links_show_table,
+        links_method = links_method,
+        links_exclude_existing = links_exclude_existing,
+        links_threshold = links_threshold,
+        links_top_n = links_top_n,
+        rules_show_table = rules_show_table,
+        rules_show_plot = rules_show_plot,
+        rules_min_support = rules_min_support,
+        rules_min_confidence = rules_min_confidence,
+        rules_min_lift = rules_min_lift,
+        rules_max_length = rules_max_length,
+        rules_max_rows = rules_max_rows,
         bootstrap_iteration = bootstrap_iteration,
         bootstrap_level = bootstrap_level,
         bootstrap_method = bootstrap_method,
         bootstrap_range_low = bootstrap_range_low,
         bootstrap_range_up = bootstrap_range_up,
+        bootstrap_set_threshold = bootstrap_set_threshold,
         bootstrap_threshold = bootstrap_threshold,
+        bootstrap_ci_method = bootstrap_ci_method,
         bootstrap_show_plot = bootstrap_show_plot,
         bootstrap_show_table = bootstrap_show_table,
         bootstrap_table_max_rows = bootstrap_table_max_rows,
         bootstrap_table_show_all = bootstrap_table_show_all,
         bootstrap_table_significant_only = bootstrap_table_significant_only,
+        stability_show_table = stability_show_table,
+        stability_show_plot = stability_show_plot,
+        stability_iter = stability_iter,
+        stability_threshold = stability_threshold,
+        stability_certainty = stability_certainty,
+        stability_method = stability_method,
         permutation_show_table = permutation_show_table,
         permutation_show_plot = permutation_show_plot,
         permutation_iter = permutation_iter,
         permutation_paired = permutation_paired,
         permutation_level = permutation_level,
+        permutation_adjust = permutation_adjust,
         permutation_table_max_rows = permutation_table_max_rows,
         permutation_table_show_all = permutation_table_show_all,
         compare_show_summary = compare_show_summary,
         compare_show_network = compare_show_network,
+        compare_show_edges = compare_show_edges,
         compare_show_plot = compare_show_plot,
+        compare_show_diff_plot = compare_show_diff_plot,
         compare_cluster_i = compare_cluster_i,
         compare_cluster_j = compare_cluster_j,
         compare_scaling = compare_scaling,
-        compare_plot_type = compare_plot_type)
+        compare_plot_type = compare_plot_type,
+        compare_edges_max_rows = compare_edges_max_rows)
 
     analysis <- CNAEventClusterClass$new(
         options = options,
